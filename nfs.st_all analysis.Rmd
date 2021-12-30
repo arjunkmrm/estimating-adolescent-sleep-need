@@ -1,0 +1,498 @@
+---
+title: Estimating the sleep need of adolescents using nonlinear mixed effects modelling V1
+  (ongoing project)
+author: "Arjun Kumar"
+date: "9/22/2021"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+always_allow_html: yes
+---
+
+
+### Introduction
+##### How much sleep is enough sleep? Using changes in lapses during the psychomotor vigilance task (PVT), Van Dongen et al. (2003) estimated that it is close to 8.16h. In their study, participants were split into different sleep restriction conditions and lapses were analysed for each of these conditions across several days. Lapses in a PVT task are when participants miss reacting to a stimulus that they are supposed to. In general, the number of lapses increases as the amount of sleep restriction increases. Van Dongen et al. modelled this alternatively as lapses increasing as the amount of wakefulness during the previous day increase beyond a certain critical value. This was formulated mathematically as follows:
+
+$$lapses = b(excess)^\theta$$
+
+##### Here, b represents rate of change of lapses per unit change in the nonlinear part of the equation. Excess denotes sleep in excess of the critical waking duration. Theta accomodates nonlineaerity in the relationship. Excess can then be formulated as the difference between Cumulative Wake Time (CWT) across a number of days and the critical waking duration multiplied across the number of days.
+
+$$lapses = b(CWT - critical*day)^\theta$$
+
+##### Van Dongen's study was based on a population of adults between the ages 21 and 38. In this analysis, I use the same approach but for adolescents between the ages of 15 and 19. The data here is from the Need for sleep studies (Lo et al, 2016; 2017; 2019; 2020). There are four different sleep conditions - 5h, 6.5 h, 8h and 9h across the studies. The baseline sleep for all sleep conditions was 9h. Participants took the neurobehavioral tests three times every day across the sleep restriction days. For the analysis, I need the average lapses across days. These studies also had periods of recovery sleep, either inbetween or at the end. However, only the baseline sleep plus the days of sleep restriction until the first sleep recovery period is sufficient for this analysis. 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(rmarkdown)
+
+rsq <- function(y, pred){
+  r2 = cor(y, pred)^2
+  return(r2)
+}
+
+
+#load data
+data.nfs = read.csv("nfs.csv")
+head(data.nfs)
+
+
+
+```
+
+### The dataset
+
+```{r, echo=FALSE}
+
+paged_table(data.nfs)
+
+```
+
+### Data cleaning
+
+##### First, I select only the columns that are required for the analysis
+
+```{r, message = FALSE}
+
+#select only the required groups
+data.nfs = data.nfs %>% select(subj, day_num, group, lapses = pvt_lapses, sdrt = pvt_sd_rt, median_rt = pvt_median_rt)
+
+data.nfs = data.nfs %>% na.omit()
+
+#data.nfs = data.nfs %>% na.omit()
+head(data.nfs)
+tail(data.nfs, 50)
+
+```
+
+##### Since participants did the PVT task thrice a day, I summarise the results to get the average PVT lapses for each day
+
+```{r, message=FALSE}
+
+#summarize to get mean pvt lapses
+data.nfs = data.nfs %>% group_by(subj, group, day_num) %>% 
+  summarise(lapses = mean(lapses), sdrt = mean(sdrt))
+#data.nfs <- merge(data.nfs, nfs.tst, by = "subj")
+head(data.nfs)
+
+``` 
+
+Import sleep time data:
+
+```{r}
+
+nfs.tst <- data.frame()
+for(i in c(1, 2, 4, 5)){
+  study <- paste("NFS", i, sep = "")
+  if(i %in% c(1, 2)){
+  nfs.tst.temp <- read.csv(paste(study, ".csv", sep = "")) 
+  names(nfs.tst.temp)[2] = "lab"
+  nfs.tst.temp <- nfs.tst.temp %>% select(subj = Subject.ID, sleep_time = Total.Sleep.Time..hours., lab) %>% 
+    filter(lab != 0) %>% select(-lab)
+  if(i == 1){
+    day.c <- data.frame(day = rep(1:12, times = nrow(nfs.tst.temp %>% group_by(subj) %>% count())))
+    nfs.tst.temp$day <- day.c$day
+  }
+  else{
+    day.c <- data.frame(day = rep(1:15, times = nrow(nfs.tst.temp %>% group_by(subj) %>% count())))
+    nfs.tst.temp$day <- day.c$day
+  }
+  }
+  else{
+    nfs.tst.temp <- read.csv(paste(study, ".csv", sep = "")) %>% select(subj = subID, sleep_time = Total.sleep.time)
+    nfs.tst.temp <- nfs.tst.temp %>% filter(subj != "")
+
+  irreg <- nfs.tst.temp %>% group_by(subj) %>% count() %>% filter(n < 14) %>% select(subj)
+  nfs.tst.temp <- nfs.tst.temp %>% filter(!subj %in% irreg$subj)
+  
+  day.c <- data.frame(day = rep(1:14, times = nrow(nfs.tst.temp %>% group_by(subj) %>% count())))
+  nfs.tst.temp$day <- day.c$day
+  }
+  
+  nfs.tst.temp$study = study
+  nfs.tst <- rbind(nfs.tst, nfs.tst.temp)
+}
+
+tail(nfs.tst)
+nfs.tst <- na.omit(nfs.tst)
+nfs.tst %>% filter(study == "NFS1")
+#remove day 1 from NFS1 and subtract 1 from all days in NFS1 
+nfs.tst <- nfs.tst %>% filter(ifelse(study == "NFS1", day != 1, day > 0))
+nfs.tst <- nfs.tst %>% mutate(day = ifelse(study == "NFS1", day - 1, day))
+
+#fix the timeline in the same way for NFS2
+nfs.tst %>% group_by(subj) %>% filter(study == "NFS2")
+nfs.tst <- nfs.tst %>% filter(ifelse(study == "NFS2", day %in% c(3 : 14), day > 0))
+
+#fix it for NFS4 and NFS5
+nfs.tst %>% group_by(subj) %>% filter(study == "NFS4")
+nfs.tst <- nfs.tst %>% filter(ifelse(study == "NFS4", day %in% c(2 : 13), day > 0))
+
+nfs.tst %>% group_by(subj) %>% filter(study == "NFS5")
+nfs.tst <- nfs.tst %>% filter(ifelse(study == "NFS5", day %in% c(2 : 13), day > 0))
+
+nfs.tst <- nfs.tst %>% mutate(day = ifelse(study %in% c("NFS4", "NFS5"), day + 1, day))
+
+# nfs.tst <- nfs.tst %>% filter(ifelse(study != "NFS1", day %in% c(3 : 14), day %in% c(1 : 11)))
+nfs.tst$sleep_time <- as.numeric(nfs.tst$sleep_time)
+#nfs.tst <- na.omit(nfs.tst)
+nfs.tst <- nfs.tst %>% mutate(sleep_time = ifelse(sleep_time > 24, sleep_time/60, sleep_time))
+############
+#filtering to match participants in both datasets
+
+subj.tst <-  nfs.tst %>% group_by(subj) %>% count() %>% select(subj)
+data.nfs <- data.nfs %>% filter(subj %in% subj.tst$subj)
+subj.nfs <-  data.nfs %>% group_by(subj) %>% count() %>% select(subj)
+nfs.tst <- nfs.tst %>% filter(subj %in% subj.nfs$subj)
+
+#nfs.tst$day = nfs.tst$day -1
+
+nrow(data.nfs)
+nrow(nfs.tst)
+
+names(nfs.tst)[3] = "day_num"
+
+```
+
+
+```{r}
+
+common_names <- intersect(names(data.nfs), names(nfs.tst))
+data.safe <- data.nfs
+#data.nfs <- data.safe
+data.nfs <- merge(data.nfs, nfs.tst, by = common_names, all.x = TRUE)
+data.nfs %>% filter(study == "NFS1")
+
+```
+
+##### I create a new column that denotes their sleep duration during the previous night. On baseline days, they have 9h of sleep and their sleep time varies based on their sleep condition on the other days. The day numbers are also made to align across the different studies and start with day 1 being the baseline day.
+
+```{r}
+
+#Create a new column 'ST' indicating sleep time on the previous night:
+
+#NFS 1, nonap_5hx7 - data starts from day 1
+#day 1 is after baseline; 9, 10, 11 are after recovery nights
+data.nfs = data.nfs %>% 
+  mutate(ST = ifelse(group == "nonap_5hx7" & day_num %in% c(1, 9, 10, 11), 9.0, 0.0)) #assign 9h
+
+#NFS 1, control group
+data.nfs = data.nfs %>% 
+  mutate(ST = ifelse(group == "control_9h", 9, ST))
+
+#Other NFS - data starts from day 3
+#day 3 is baseline, 9, 10 are after the intermediate recovery nights
+#day 14 is the final recovery night
+data.nfs = data.nfs %>% 
+  mutate(ST = ifelse(group != "nonap_5hx7" & day_num %in% c(3, 9, 10, 14), 9.0, ST))
+
+data.nfs <- data.nfs %>% mutate(day_num = ifelse(group %in% c("nonap_5hx7", "control_9h"), day_num + 2, day_num))#bring the baseline day to 3 for NFS 1
+
+#initialise condition
+data.nfs <- data.nfs %>% mutate(condition = 0)
+
+#rename groups to numeric value denoting sleep condition
+data.nfs$condition[data.nfs$group == "nonap_5hx7"] = as.numeric(5)
+data.nfs$condition[data.nfs$group == "nonap_5h"] = as.numeric(5)
+data.nfs$condition[data.nfs$group == "nonap_6pt5h"] = as.numeric(6.5)
+data.nfs$condition[data.nfs$group == "nonap_8h"] = as.numeric(8)
+data.nfs$condition[data.nfs$group == "control_9h"] = as.numeric(9)
+data.nfs$condition[data.nfs$group == "nap60_5h"] = as.numeric(6)
+data.nfs$condition[data.nfs$group == "nap90_5h"] = as.numeric(6.5)
+data.nfs$condition[data.nfs$group == "nap90_6pt5h"] = as.numeric(8)
+
+data.nfs = data.nfs %>% 
+  mutate(ST = ifelse(ST == 0.0, as.numeric(condition), ST))#set ST for other days using sleep conditions
+
+#align the day numbers between the different NFS together
+
+data.nfs = data.nfs %>% 
+  mutate(day_num = day_num - 2)#subtract 2 from all to bring baseline day to 1
+
+```
+
+##### Finally I calculate the cumulative wake duration for each participant
+
+```{r, message=FALSE}
+
+#Calculate cumulative wake duration
+
+data.nfs = data.nfs %>% group_by(subj) %>% 
+  mutate(TWT = cumsum(24 - ST))
+
+data.nfs = data.nfs %>% group_by(subj) %>% 
+  mutate(wake_time = cumsum(24 - sleep_time))
+
+#Filter only days until the first 6 days (1 baseline and 5 manipulation)
+data.nfs = data.nfs %>% filter(day_num <= 6)
+
+#data.allconditions <- data.nfs
+
+data.naponly = data.nfs %>% filter(group %in% c("nap60_5h", "nap90_5h", "nap90_6pt5h"))
+
+data.nonap = data.nfs %>% filter(group != "nap60_5h",
+                                group != "nap90_5h",
+                                group != "nap90_6pt5h")
+tail(data.nonap, 100)
+data.nonap <- na.omit(data.nonap)
+
+```
+
+### Clean data
+
+##### Summing up, the last baseline day plus the first five sleep manipulation days were used for the analysis from the NFS studies. ‘Lapses’ represents mean lapses on a particular day (day_num). Sleep Time (ST) represents the total sleep time on the previous night. Total Wake Time (TWT) was calculated as the cumulative total wakeful duration across days (24 – ST*day_num). After cleaning, there were 852 observations in total (6 days x 142 subjects).
+
+```{r, message=FALSE}
+
+paged_table(data.nfs)
+
+```
+
+### Visualising the data
+
+#### Boxplot
+
+```{r, echo = FALSE, fig.width=10}
+
+# Lapses across groups
+
+ggplot(data.nonap, aes(x = as.factor(condition), y = lapses)) +
+   geom_boxplot(outlier.shape = NA, aes(fill = as.factor(condition)), alpha = 0.5) +
+   geom_jitter(alpha = 0.2, aes(color = factor(condition))) +
+   labs(x = "day", y = "lapses", title = "Lapses vs Sleep condition across 6 days", fill = "Condition") +
+  facet_wrap(~ day_num) +
+  guides(color = FALSE)
+  
+
+```
+
+##### As it can be seen, the number of lapses increases across the days as the level of sleep restriction increases. This can be noted more clearly in the following charts
+
+#### Scatter plot of lapses across days divided by condition
+
+```{r, message=FALSE, fig.align="center"}
+
+#lapses vs day
+
+ggplot(data.nonap, aes(x = day_num, y = lapses) ) +
+  #geom_ribbon() +
+  geom_jitter(aes(y = lapses, color = factor(condition)), alpha = 0.3) +
+  labs(x = "day", y = "mean lapses", title = " ", color = "condition") +
+  facet_wrap(~ as.factor(condition))
+
+```
+
+#### Line plot of lapses across days
+
+```{r, message=FALSE, fig.align="center"}
+
+#mean lapses vs day
+
+ggplot(data.nonap, aes(x = day_num, y = lapses, color = as.factor(condition))) +
+   stat_summary(fun = mean, geom = "line", size = 1, alpha = 0.5) +
+   stat_summary(fun = mean, geom = "point") +
+   stat_summary(fun.data = mean_cl_normal, geom = "errorbar", aes(group = as.factor(condition)), width = 0.05) +
+   labs(x = "day", y = "mean lapses", title = " ", color = "condition") + theme_minimal()
+
+
+```
+
+### Estimating Sleep Need
+
+##### I'm using the nlme() function from the nlme library to fit a nonlinear mixed effects model to my data.
+
+```{r, message=FALSE}
+
+library(nlme)
+
+# data.nonap <- data.nonap %>% filter(!subj %in% c("NFS044", "NFS2032", "NFS4024", "NFS4031", "NFS4051"))
+
+#assign an id for each subject
+#id <- rep(1:(nrow(data.nfs)/6), each = 6)
+#data.nfs$id <- id
+#BED TIME ESTIMATES
+sleep.nonap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
+                   data = data.nonap,
+                   fixed = b + theta + crit ~ 1,
+                   random = crit ~ 1,
+                   groups = ~ subj,
+                   start = c(b = 1.4, theta = 0.4, crit = 13),
+                   na.action = na.omit
+                   ) 
+
+summary(sleep.nonap.lapses)
+
+#SLEEP TIME ESTIMATES - no nap
+st.nonap.lapses <- nlme(lapses ~ b*(wake_time - crit*day_num)^theta,
+                   data = data.nonap,
+                   fixed = b + theta + crit ~ 1,
+                   random = crit ~ 1,
+                   groups = ~ subj,
+                   start = c(b = 1.4, theta = 0.5, crit = 12),
+                   na.action = na.omit
+                   ) 
+
+summary(st.nonap.lapses)
+
+#SLEEP TIME ESTIMATES - all groups
+
+# st.nonap.lapses <- nlme(lapses ~ b*(wake_time - crit*day_num)^theta,
+#                    data = data.nfs,
+#                    fixed = b + theta + crit ~ 1,
+#                    random = crit ~ 1,
+#                    groups = ~ subj,
+#                    start = c(b = 1.5, theta = 0.6, crit = 14),
+#                    na.action = na.omit
+#                    ) 
+
+#summary(st.nonap.lapses)
+
+# st.nonap.lapses <- nlme(lapses ~ b*(wake_time - crit*day_num)^theta,
+#                    data = data.nonap,
+#                    fixed = b + theta + crit ~ 1,
+#                    random = crit ~ 1,
+#                    groups = ~ subj,
+#                    start = c(b = 2, theta = 0.4, crit = 14),
+#                    na.action = na.omit,
+#                    weights = varPower(fixed = 0.5)
+#                    ) 
+# summary(st.nonap.lapses)
+
+# sleep.allconditions.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
+#                    data = data.allconditions,
+#                    fixed = b + theta + crit ~ 1,
+#                    random = crit ~ 1,
+#                    groups = ~ subj,
+#                    start = c(b = 1.5, theta = 0.5, crit = 12),
+#                    na.action = na.omit
+#                    ) 
+# 
+# summary(sleep.allconditions.lapses)
+?nlme
+
+```
+
+### Estimates and their 95% confidence intervals
+
+```{r, message=FALSE}
+
+intervals(st.nonap.lapses)
+
+```
+### Visualising the random effect - critical waking duration
+
+```{r, message=FALSE, fig.align="center"}
+
+#extract critical wake duration
+crit <- st.nonap.lapses$coefficients$random$subj + st.nonap.lapses$coefficients$fixed[3]
+crit <- data.frame(crit)
+
+crit$id <- 1:nrow(crit)
+
+ggplot(crit, aes(x = crit, y = id)) +
+  geom_point(alpha = 0.5, color = "darkgreen") +
+  geom_vline(xintercept = st.nonap.lapses$coefficients$fixed[3], color = "navyblue", linetype = 2, size = 0.7) +
+  labs(x = "critical waking duration", y = "id")
+
+```
+
+##### Let's check the normality of the distribution
+
+```{r, message=FALSE, fig.align="center"}
+
+#extract sd of random effects
+sdcrit <- intervals(st.nonap.lapses)
+sdcrit <- sdcrit$reStruct$subj$est.
+
+qqnorm(crit$crit, pch = 1, frame = FALSE)
+qqline(crit$crit, col = "steelblue", lwd = 2)
+
+```
+
+##### The plot indicates a left skew. Let's check the histogram
+
+```{r message=FALSE, fig.align="center"}
+
+ggplot(crit, aes(x = crit)) +
+  geom_histogram(bins = 50, fill = "black", color = "white", alpha = 0.8, aes(y = ..count..)) 
+
+plot(st.nonap.lapses)
+
+```
+
+##### There are clearly some outliers having oversized influence on the distribution. However, that's for another time. Let's assume normalty for now and compare the distribution obtained from this estimate with Van Dongen et al.(2003) and Short et al. (2018) estimates for the critical waking duration
+
+```{r message=FALSE, fig.align="center"}
+
+
+#plot different estimates
+ggplot(crit, aes(x = crit)) +
+  #stat_function(fun = dnorm, args = list(15.88, 1.42), color = "red", size = 1, alpha = 0.5) +
+  geom_area(stat = "function", fun = dnorm, args = list(mean = st.nonap.lapses$coefficients$fixed[3], sd = sdcrit), aes(fill = "NFS, age: 15 - 19"), alpha = 0.2) +
+  geom_area(stat = "function", fun = dnorm, args = list(mean = 15.82, sd = 3.84), aes(fill = "Van Dongen et al., age: 21 - 38"), alpha = 0.2)+
+  geom_area(stat = "function", fun = dnorm, args = list(mean = 14.65, sd = 4.14), aes(fill = "Short et al., age: 15 - 17"),  alpha = 0.2)
+
+
+```
+
+### Mean lapses vs excess wakefulness
+
+##### The line represents predicted number of lapses, dots represent the actual number of lapses observed.
+
+```{r message = FALSE, fig.align="center"}
+
+#lapses predictions
+data.nonap$plapses = predict(st.nonap.lapses, data.nonap)
+data.nonap$plapses[is.nan(data.nonap$plapses)] <- 0.0
+
+#graphing lapses vs excess
+crit.lapses <- st.nonap.lapses$coefficients$random$subj + st.nonap.lapses$coefficients$fixed[3]
+crit.lapses <- data.frame(crit.lapses)
+
+crit.lapses %>% filter(crit < 15)
+quantile(crit.lapses$crit, seq(0, 1, 0.10))
+
+# crit.lapses = crit.lapses %>% 
+#   mutate(z_latency = as.vector(scale(crit)))
+# crit.lapses = crit.lapses %>%  filter(z_latency < -2)
+
+crit.names <- data.frame(subj = rownames(crit.lapses))
+crit.lapses$subj <- crit.names$subj
+
+subj.irreg <- data.nonap %>% group_by(subj) %>% count() %>% filter(n < 6) %>% select(subj)
+data.nonap <- data.nonap %>% filter(!subj %in% c("NFS2073", "NFS4042", "NFS5063"))
+
+crit.lapses <- crit.lapses %>% filter(!subj %in% c("NFS2073", "NFS4042", "NFS5063"))
+
+#filtering to match participants in both datasets
+
+subj.nonap <-  data.nonap %>% group_by(subj) %>% count() %>% select(subj)
+crit.lapses <- crit.lapses %>% filter(subj %in% subj.nonap$subj)
+subj.crit <-  crit.lapses %>% group_by(subj) %>% count() %>% select(subj)
+data.nonap <- data.nonap %>% filter(subj %in% subj.crit$subj)
+
+#
+nrow(data.nonap)/6
+nrow(crit.lapses)
+
+crit.lapses = rep(crit.lapses$crit, each = 6)
+data.nonap = cbind(data.nonap, critical.lapses = crit.lapses)
+data.nonap = data.nonap %>% mutate(excess.lapses = TWT - critical.lapses*day_num)
+
+data.nonap = data.nonap %>% mutate(excess.lapses = ifelse(excess.lapses < 0, 0, excess.lapses))
+
+ggplot(data.nonap, aes(x = excess.lapses, y = lapses)) +
+  stat_summary(fun = mean, geom = "point", aes(group = as.factor(condition), color = as.factor(condition)), alpha = 0.3) +
+ # geom_smooth(color = "black") +
+  stat_summary(fun = mean, geom = "point", aes(y = plapses), size = 1, alpha = 0.5) +
+  #geom_line(aes(y = pred, group = subj)) +
+  labs(x = "excess wakefulness", y = "mean lapses", title = "Mean Lapses vs Excess Wakefulness", color = "condition")
+
+```
+
+
+
+
