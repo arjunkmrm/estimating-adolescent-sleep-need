@@ -25,7 +25,7 @@ Van Dongen's study was based on a population of adults between the ages 21 and 3
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(knitr::opts_chunk$set(warning = FALSE, message = FALSE), echo = TRUE)
 
 ```
 
