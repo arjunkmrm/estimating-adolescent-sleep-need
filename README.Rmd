@@ -431,6 +431,8 @@ ggplot(crit, aes(x = crit)) +
 
 ## Mean lapses vs excess wakefulness
 
+$$lapses = 3.62*(excess)^{0.67}$$
+
 The line represents predicted number of lapses, dots represent the actual number of lapses observed.
 
 ```{r, echo = FALSE, message=FALSE, fig.height = 4, fig.width=6, dpi=300}
@@ -486,7 +488,7 @@ crit.lapses <- crit.lapses %>% filter(subj %in% subj.nonap$subj)
 subj.crit <-  crit.lapses %>% group_by(subj) %>% count() %>% select(subj)
 data.nonap <- data.nonap %>% filter(subj %in% subj.crit$subj)
 
-#
+
 #nrow(data.nonap)/6
 #nrow(crit.lapses)
 
@@ -501,8 +503,25 @@ ggplot(data.nonap, aes(x = excess.lapses, y = lapses)) +
  # geom_smooth(color = "black") +
   stat_summary(fun = mean, geom = "line", aes(y = plapses), size = 1, alpha = 0.5) +
   #geom_line(aes(y = pred, group = subj)) +
-  labs(x = "excess wakefulness", y = "mean lapses", title = "Mean Lapses vs Excess Wakefulness", color = "condition")
+  labs(x = "excess wakefulness", y = "mean lapses", color = "condition") + theme_minimal()
 
 ```
+
+## Predicted Lapses vs Day
+
+$$lapses = 3.62*(CWT - 17.13*day)^{0.67}$$
+
+```{r, echo = FALSE, message=FALSE, fig.height = 6, fig.width=10, dpi=300}
+
+#mean lapses vs day
+
+ggplot(data.nonap, aes(x = day_num, y = excess.lapses, color = as.factor(condition))) +
+   stat_summary(fun = mean, geom = "line", size = 1, alpha = 0.5) +
+   stat_summary(fun = mean, geom = "point") +
+   stat_summary(fun.data = mean_cl_normal, geom = "errorbar", aes(group = as.factor(condition)), width = 0.05) +
+   labs(x = "day", y = "mean lapses", title = " ", color = "condition") + theme_minimal()
+
+```
+
 
 To conclude, the estimate of critical waking duration (17.13) was greater than that of Van Dongen's estimate (15.84). Our results seem to suggest that for the average adolescent (based on the sample used for this study), 6.87h of sleep would be sufficient to prevent the build of neurobehavioral deficits at least in the context of the PVT task.
