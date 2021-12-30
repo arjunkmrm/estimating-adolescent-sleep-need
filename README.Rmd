@@ -487,8 +487,8 @@ subj.crit <-  crit.lapses %>% group_by(subj) %>% count() %>% select(subj)
 data.nonap <- data.nonap %>% filter(subj %in% subj.crit$subj)
 
 #
-nrow(data.nonap)/6
-nrow(crit.lapses)
+#nrow(data.nonap)/6
+#nrow(crit.lapses)
 
 crit.lapses = rep(crit.lapses$crit, each = 6)
 data.nonap = cbind(data.nonap, critical.lapses = crit.lapses)

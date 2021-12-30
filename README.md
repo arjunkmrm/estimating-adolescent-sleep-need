@@ -376,10 +376,6 @@ al. (2018) estimates for the critical waking duration
 The line represents predicted number of lapses, dots represent the
 actual number of lapses observed.
 
-    ## [1] 136
-
-    ## [1] 136
-
 ![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 To conclude, the estimate of critical waking duration (17.13) was
