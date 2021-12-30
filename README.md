@@ -137,6 +137,8 @@ Import sleep time data:
 
 </div>
 
+    ## Warning: NAs introduced by coercion
+
     ##     subj sleep_time day_num study
     ## 1 NFS001       7.17       1  NFS1
     ## 2 NFS001       3.47       2  NFS1
