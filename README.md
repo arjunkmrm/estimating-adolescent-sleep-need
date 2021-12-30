@@ -1,8 +1,6 @@
 Estimating the sleep need of adolescents using nonlinear mixed effects
-modelling V1 (ongoing project)
+modelling
 ================
-Arjun Kumar
-9/22/2021
 
 -   [Introduction](#introduction)
 -   [The Dataset](#the-dataset)
