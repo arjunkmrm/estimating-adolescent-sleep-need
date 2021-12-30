@@ -369,7 +369,7 @@ intervals(st.nonap.lapses)
 # Visualising the results
 ## Dot Plot - Critical Wake Durations across participants
 
-```{r, echo = FALSE, message=FALSE, fig.height = 6, fig.width=6, dpi=300}
+```{r, echo = FALSE, message=FALSE, fig.height = 3, fig.width=5, dpi=300}
 
 #extract critical wake duration
 crit <- st.nonap.lapses$coefficients$random$subj + st.nonap.lapses$coefficients$fixed[3]
