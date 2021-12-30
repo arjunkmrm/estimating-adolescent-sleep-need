@@ -73,7 +73,7 @@ until the first sleep recovery period is sufficient for this analysis.
 
 # The Dataset
 
-The dataset for this analysis comes from NFS1, NFS2, NFS4 and NFS5. Here
+The dataset for this analysis came from NFS1, NFS2, NFS4 and NFS5. Here
 is a section of the original dataset. Most of the columns have been
 omitted for the sake of presentation here.
 
@@ -87,7 +87,7 @@ omitted for the sake of presentation here.
 
 ## Data cleaning
 
-First, I select only the columns that are required for the analysis.
+First, I selected only the columns that were required for the analysis.
 
     ##     subj day_num      group lapses
     ## 1 NFS001       1 nonap_5hx7      1
@@ -111,7 +111,7 @@ results to get the average PVT lapses for each day.
     ## 5 NFS001 nonap_5hx7       5  7    
     ## 6 NFS001 nonap_5hx7       6 17.3
 
-I imported the TST data.
+I then imported the TST data.
 
     ##     subj  TST day_num study
     ## 1 NFS001 7.17       1  NFS1
@@ -121,7 +121,7 @@ I imported the TST data.
     ## 5 NFS001 4.30       5  NFS1
     ## 6 NFS001 4.23       6  NFS1
 
-Merge sleep time data and NFS dataset
+Then I merged the TST dataset and the NFS dataset.
 
     ##     subj day_num      group     lapses  TST study
     ## 1 NFS001       1 nonap_5hx7  1.3333333 7.17  NFS1
@@ -131,11 +131,11 @@ Merge sleep time data and NFS dataset
     ## 5 NFS001       5 nonap_5hx7  7.0000000 4.30  NFS1
     ## 6 NFS001       6 nonap_5hx7 17.3333333 4.23  NFS1
 
-I create a new column that denotes their bed time during the previous
-night. On baseline days, they have 9h of sleep and their sleep time
-varies based on their sleep condition on the other days. The day numbers
-are also made to align across the different studies and start with day 1
-being the baseline day.
+I created a new column that denotes their total bed time during the
+previous night. On baseline days, they had 9h of sleep and their bed
+time varies based on their sleep condition on the other days. The day
+numbers were also made to align across the different studies and start
+with day 1 being the baseline day.
 
     ##     subj day_num      group     lapses  TST study TBT condition
     ## 1 NFS001       1 nonap_5hx7  1.3333333 7.17  NFS1   9         5
@@ -145,7 +145,8 @@ being the baseline day.
     ## 5 NFS001       5 nonap_5hx7  7.0000000 4.30  NFS1   5         5
     ## 6 NFS001       6 nonap_5hx7 17.3333333 4.23  NFS1   5         5
 
-Finally I calculate the cumulative wake duration for each participant
+Finally I calculated the cumulative wake duration for each participant
+based on the TBT and TST estimates.
 
     ## # A tibble: 6 × 10
     ## # Groups:   subj [1]
@@ -162,11 +163,13 @@ Finally I calculate the cumulative wake duration for each participant
 
 Summing up, the last baseline day plus the first five sleep manipulation
 days were used for the analysis from the NFS studies. ‘Lapses’
-represents mean lapses on a particular day (day_num). Sleep Time (ST)
-represents the total sleep time on the previous night. Total Wake Time
-(TWT) was calculated as the cumulative total wakeful duration across
-days (24 – ST\*day_num). After cleaning, there were 852 observations in
-total (6 days x 142 subjects).
+represents mean lapses on a particular day (day_num). TST represents the
+total sleep time on the previous night. TBT represents the total bed
+time on the previous night. Total Wake Time was calculated as the
+cumulative total wakeful duration across days based on both the TST
+estimate \[(TWT_tst = 24 – TST_tbt) x day_num\] and TBT estimate
+\[(TWT_tbt = 24 – TST_tbt) x day_num\]. After cleaning, there were 834
+observations in total (6 days x 139 subjects).
 
     ## # A tibble: 6 × 10
     ## # Groups:   subj [1]

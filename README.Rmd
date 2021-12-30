@@ -28,7 +28,7 @@ knitr::opts_chunk$set(knitr::opts_chunk$set(warning = FALSE, message = FALSE), e
 
 # The Dataset
 
-The dataset for this analysis comes from NFS1, NFS2, NFS4 and NFS5. Here is a section of the original dataset. Most of the columns have been omitted for the sake of presentation here.
+The dataset for this analysis came from NFS1, NFS2, NFS4 and NFS5. Here is a section of the original dataset. Most of the columns have been omitted for the sake of presentation here.
 
 ```{r, message=FALSE, echo=FALSE}
 
@@ -43,7 +43,7 @@ print(head(data.nfs[, 1:8])) #display dataset
 
 ## Data cleaning
 
-First, I select only the columns that are required for the analysis.
+First, I selected only the columns that were required for the analysis.
 
 ```{r, message = FALSE, echo=FALSE}
 
@@ -65,7 +65,7 @@ print(head(data.nfs))
 
 ```
 
-I imported the TST data.
+I then imported the TST data.
 
 ```{r, echo=FALSE}
 
@@ -149,7 +149,7 @@ names(nfs.tst)[2] = "TST" #name sleep_time column to 'TST'
 print(head(nfs.tst))
 ```
 
-Merge sleep time data and NFS dataset
+Then I merged the TST dataset and the NFS dataset.
 
 ```{r, echo=FALSE}
 common_names <- intersect(names(data.nfs), names(nfs.tst))
@@ -160,7 +160,7 @@ data.nfs <- merge(data.nfs, nfs.tst, by = common_names, all.x = TRUE)
 print(head(data.nfs))
 ```
 
-I create a new column that denotes their bed time during the previous night. On baseline days, they have 9h of sleep and their sleep time varies based on their sleep condition on the other days. The day numbers are also made to align across the different studies and start with day 1 being the baseline day.
+I created a new column that denotes their total bed time during the previous night. On baseline days, they had 9h of sleep and their bed time varies based on their sleep condition on the other days. The day numbers were also made to align across the different studies and start with day 1 being the baseline day.
 
 ```{r, echo=FALSE}
 
@@ -207,7 +207,7 @@ data.nfs = data.nfs %>%
 print(head(data.nfs))
 ```
 
-Finally I calculate the cumulative wake duration for each participant
+Finally I calculated the cumulative wake duration for each participant based on the TBT and TST estimates.
 
 ```{r, echo=FALSE}
 
@@ -238,7 +238,7 @@ print(head(data.nfs))
 
 ## Clean data
 
-Summing up, the last baseline day plus the first five sleep manipulation days were used for the analysis from the NFS studies. ‘Lapses’ represents mean lapses on a particular day (day_num). Sleep Time (ST) represents the total sleep time on the previous night. Total Wake Time (TWT) was calculated as the cumulative total wakeful duration across days (24 – ST*day_num). After cleaning, there were 852 observations in total (6 days x 142 subjects).
+Summing up, the last baseline day plus the first five sleep manipulation days were used for the analysis from the NFS studies. ‘Lapses’ represents mean lapses on a particular day (day_num). TST represents the total sleep time on the previous night. TBT represents the total bed time on the previous night. Total Wake Time was calculated as the cumulative total wakeful duration across days based on both the TST estimate [(TWT_tst = 24 – TST_tbt) x day_num] and TBT estimate [(TWT_tbt = 24 – TST_tbt) x day_num]. After cleaning, there were 834 observations in total (6 days x 139 subjects).
 
 ```{r, echo=FALSE}
 
@@ -517,7 +517,7 @@ $$lapses = 3.62*(CWT - 17.13*day)^{0.67}$$
 
 ggplot(data.nonap, aes(x = day_num, y = excess.lapses, color = as.factor(condition))) +
    stat_summary(fun = mean, geom = "line", size = 1, alpha = 0.5) +
-   stat_summary(fun = mean, geom = "point") +
+   #geom_jitter(aes(y = lapses), alpha = 0.3) +
    stat_summary(fun.data = mean_cl_normal, geom = "errorbar", aes(group = as.factor(condition)), width = 0.05) +
    labs(x = "day", y = "mean lapses", title = " ", color = "condition") + theme_minimal()
 
