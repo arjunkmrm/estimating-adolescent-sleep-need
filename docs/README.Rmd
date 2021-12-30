@@ -5,7 +5,6 @@ author: "Arjun Kumar"
 date: "9/22/2021"
 output: 
   github_document:
-    df_print: paged
     dev: png
     toc: true
 ---
