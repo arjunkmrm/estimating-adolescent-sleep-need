@@ -21,7 +21,8 @@ Arjun Kumar
         -   [Summary](#summary-1)
         -   [Estimates and their 95% confidence
             intervals](#estimates-and-their-95-confidence-intervals-1)
--   [Visualising the results](#visualising-the-results)
+-   [Visualising the results of TST based
+    estimate](#visualising-the-results-of-tst-based-estimate)
     -   [Dot Plot - Critical Wake Durations across
         participants](#dot-plot---critical-wake-durations-across-participants)
     -   [QQ Plot - Normality of
@@ -48,7 +49,7 @@ lapses increasing as the amount of wakefulness during the previous day
 increase beyond a certain critical value. This was formulated
 mathematically as follows:
 
-*l**a**p**s**e**s* = *b*(*e**x**c**e**s**s*)<sup>*θ*</sup>
+![lapses = b(excess)^\\theta](https://latex.codecogs.com/png.latex?lapses%20%3D%20b%28excess%29%5E%5Ctheta "lapses = b(excess)^\theta")
 
 Here, b represents rate of change of lapses per unit change in the
 nonlinear part of the equation. Excess denotes sleep in excess of the
@@ -57,7 +58,7 @@ relationship. Excess can then be formulated as the difference between
 Cumulative Wake Time (CWT) across a number of days and the critical
 waking duration multiplied across the number of days.
 
-*l**a**p**s**e**s* = *b*(*C**W**T*−*c**r**i**t**i**c**a**l*\**d**a**y*)<sup>*θ*</sup>
+![lapses = b(CWT - critical\*day)^\\theta](https://latex.codecogs.com/png.latex?lapses%20%3D%20b%28CWT%20-%20critical%2Aday%29%5E%5Ctheta "lapses = b(CWT - critical*day)^\theta")
 
 Van Dongen’s study was based on a population of adults between the ages
 21 and 38. In this analysis, I use the same approach but for adolescents
@@ -75,7 +76,7 @@ until the first sleep recovery period is sufficient for this analysis.
 
 The dataset for this analysis comes from NFS1, NFS2, NFS4 and NFS5. Here
 is a section of the original dataset. Most of the columns have been
-ommitted for the sake of presentation here.
+omitted for the sake of presentation here.
 
     ##     subj gender day_num test_num kss pvt_median_rt pvt_sd_rt pvt_lapses
     ## 1 NFS001 Female       1        1   6           229        78          1
@@ -97,7 +98,7 @@ First, I select only the columns that are required for the analysis.
     ## 5 NFS001       2 nonap_5hx7      0
     ## 6 NFS001       2 nonap_5hx7      0
 
-Since participants did the PVT task thrice a day, I summarise the
+Since participants did the PVT task three times a day, I summarised the
 results to get the average PVT lapses for each day.
 
     ## # A tibble: 6 × 4
@@ -111,25 +112,25 @@ results to get the average PVT lapses for each day.
     ## 5 NFS001 nonap_5hx7       5  7    
     ## 6 NFS001 nonap_5hx7       6 17.3
 
-Import sleep time data:
+I imported the TST data.
 
-    ##     subj sleep_time day_num study
-    ## 1 NFS001       7.17       1  NFS1
-    ## 2 NFS001       3.47       2  NFS1
-    ## 3 NFS001       3.97       3  NFS1
-    ## 4 NFS001       4.20       4  NFS1
-    ## 5 NFS001       4.30       5  NFS1
-    ## 6 NFS001       4.23       6  NFS1
+    ##     subj  TST day_num study
+    ## 1 NFS001 7.17       1  NFS1
+    ## 2 NFS001 3.47       2  NFS1
+    ## 3 NFS001 3.97       3  NFS1
+    ## 4 NFS001 4.20       4  NFS1
+    ## 5 NFS001 4.30       5  NFS1
+    ## 6 NFS001 4.23       6  NFS1
 
 Merge sleep time data and NFS dataset
 
-    ##     subj day_num      group     lapses sleep_time study
-    ## 1 NFS001       1 nonap_5hx7  1.3333333       7.17  NFS1
-    ## 2 NFS001       2 nonap_5hx7  0.3333333       3.47  NFS1
-    ## 3 NFS001       3 nonap_5hx7  5.0000000       3.97  NFS1
-    ## 4 NFS001       4 nonap_5hx7  6.3333333       4.20  NFS1
-    ## 5 NFS001       5 nonap_5hx7  7.0000000       4.30  NFS1
-    ## 6 NFS001       6 nonap_5hx7 17.3333333       4.23  NFS1
+    ##     subj day_num      group     lapses  TST study
+    ## 1 NFS001       1 nonap_5hx7  1.3333333 7.17  NFS1
+    ## 2 NFS001       2 nonap_5hx7  0.3333333 3.47  NFS1
+    ## 3 NFS001       3 nonap_5hx7  5.0000000 3.97  NFS1
+    ## 4 NFS001       4 nonap_5hx7  6.3333333 4.20  NFS1
+    ## 5 NFS001       5 nonap_5hx7  7.0000000 4.30  NFS1
+    ## 6 NFS001       6 nonap_5hx7 17.3333333 4.23  NFS1
 
 I create a new column that denotes their bed time during the previous
 night. On baseline days, they have 9h of sleep and their sleep time
@@ -137,26 +138,26 @@ varies based on their sleep condition on the other days. The day numbers
 are also made to align across the different studies and start with day 1
 being the baseline day.
 
-    ##     subj day_num      group     lapses sleep_time study ST condition
-    ## 1 NFS001       1 nonap_5hx7  1.3333333       7.17  NFS1  9         5
-    ## 2 NFS001       2 nonap_5hx7  0.3333333       3.47  NFS1  5         5
-    ## 3 NFS001       3 nonap_5hx7  5.0000000       3.97  NFS1  5         5
-    ## 4 NFS001       4 nonap_5hx7  6.3333333       4.20  NFS1  5         5
-    ## 5 NFS001       5 nonap_5hx7  7.0000000       4.30  NFS1  5         5
-    ## 6 NFS001       6 nonap_5hx7 17.3333333       4.23  NFS1  5         5
+    ##     subj day_num      group     lapses  TST study TBT condition
+    ## 1 NFS001       1 nonap_5hx7  1.3333333 7.17  NFS1   9         5
+    ## 2 NFS001       2 nonap_5hx7  0.3333333 3.47  NFS1   5         5
+    ## 3 NFS001       3 nonap_5hx7  5.0000000 3.97  NFS1   5         5
+    ## 4 NFS001       4 nonap_5hx7  6.3333333 4.20  NFS1   5         5
+    ## 5 NFS001       5 nonap_5hx7  7.0000000 4.30  NFS1   5         5
+    ## 6 NFS001       6 nonap_5hx7 17.3333333 4.23  NFS1   5         5
 
 Finally I calculate the cumulative wake duration for each participant
 
     ## # A tibble: 6 × 10
     ## # Groups:   subj [1]
-    ##   subj   day_num group      lapses sleep_time study    ST condition   TWT wake_time
-    ##   <chr>    <dbl> <chr>       <dbl>      <dbl> <chr> <dbl>     <dbl> <dbl>     <dbl>
-    ## 1 NFS001       1 nonap_5hx7  1.33        7.17 NFS1      9         5    15      16.8
-    ## 2 NFS001       2 nonap_5hx7  0.333       3.47 NFS1      5         5    34      37.4
-    ## 3 NFS001       3 nonap_5hx7  5           3.97 NFS1      5         5    53      57.4
-    ## 4 NFS001       4 nonap_5hx7  6.33        4.2  NFS1      5         5    72      77.2
-    ## 5 NFS001       5 nonap_5hx7  7           4.3  NFS1      5         5    91      96.9
-    ## 6 NFS001       6 nonap_5hx7 17.3         4.23 NFS1      5         5   110     117.
+    ##   subj   day_num group      lapses   TST study   TBT condition TWT_tbt TWT_tst
+    ##   <chr>    <dbl> <chr>       <dbl> <dbl> <chr> <dbl>     <dbl>   <dbl>   <dbl>
+    ## 1 NFS001       1 nonap_5hx7  1.33   7.17 NFS1      9         5      15    16.8
+    ## 2 NFS001       2 nonap_5hx7  0.333  3.47 NFS1      5         5      34    37.4
+    ## 3 NFS001       3 nonap_5hx7  5      3.97 NFS1      5         5      53    57.4
+    ## 4 NFS001       4 nonap_5hx7  6.33   4.2  NFS1      5         5      72    77.2
+    ## 5 NFS001       5 nonap_5hx7  7      4.3  NFS1      5         5      91    96.9
+    ## 6 NFS001       6 nonap_5hx7 17.3    4.23 NFS1      5         5     110   117.
 
 ## Clean data
 
@@ -170,14 +171,14 @@ total (6 days x 142 subjects).
 
     ## # A tibble: 6 × 10
     ## # Groups:   subj [1]
-    ##   subj   day_num group      lapses sleep_time study    ST condition   TWT wake_time
-    ##   <chr>    <dbl> <chr>       <dbl>      <dbl> <chr> <dbl>     <dbl> <dbl>     <dbl>
-    ## 1 NFS001       1 nonap_5hx7  1.33        7.17 NFS1      9         5    15      16.8
-    ## 2 NFS001       2 nonap_5hx7  0.333       3.47 NFS1      5         5    34      37.4
-    ## 3 NFS001       3 nonap_5hx7  5           3.97 NFS1      5         5    53      57.4
-    ## 4 NFS001       4 nonap_5hx7  6.33        4.2  NFS1      5         5    72      77.2
-    ## 5 NFS001       5 nonap_5hx7  7           4.3  NFS1      5         5    91      96.9
-    ## 6 NFS001       6 nonap_5hx7 17.3         4.23 NFS1      5         5   110     117.
+    ##   subj   day_num group      lapses   TST study   TBT condition TWT_tbt TWT_tst
+    ##   <chr>    <dbl> <chr>       <dbl> <dbl> <chr> <dbl>     <dbl>   <dbl>   <dbl>
+    ## 1 NFS001       1 nonap_5hx7  1.33   7.17 NFS1      9         5      15    16.8
+    ## 2 NFS001       2 nonap_5hx7  0.333  3.47 NFS1      5         5      34    37.4
+    ## 3 NFS001       3 nonap_5hx7  5      3.97 NFS1      5         5      53    57.4
+    ## 4 NFS001       4 nonap_5hx7  6.33   4.2  NFS1      5         5      72    77.2
+    ## 5 NFS001       5 nonap_5hx7  7      4.3  NFS1      5         5      91    96.9
+    ## 6 NFS001       6 nonap_5hx7 17.3    4.23 NFS1      5         5     110   117.
 
 # Visualising the dataset
 
@@ -207,7 +208,7 @@ mixed effects model to my data.
 
 ``` r
 library(nlme)
-sleep.nonap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
+TBT.nonap.lapses <- nlme(lapses ~ b*(TWT_tbt - crit*day_num)^theta,
                    data = data.nonap,
                    fixed = b + theta + crit ~ 1,
                    random = crit ~ 1,
@@ -216,11 +217,11 @@ sleep.nonap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
                    na.action = na.omit
                    ) 
 
-summary(sleep.nonap.lapses)
+summary(TBT.nonap.lapses)
 ```
 
     ## Nonlinear mixed-effects model fit by maximum likelihood
-    ##   Model: lapses ~ b * (TWT - crit * day_num)^theta 
+    ##   Model: lapses ~ b * (TWT_tbt - crit * day_num)^theta 
     ##   Data: data.nonap 
     ##        AIC      BIC    logLik
     ##   4360.464 4384.035 -2175.232
@@ -250,7 +251,7 @@ summary(sleep.nonap.lapses)
 ### Estimates and their 95% confidence intervals
 
 ``` r
-intervals(sleep.nonap.lapses)
+intervals(TBT.nonap.lapses)
 ```
 
     ## Approximate 95% confidence intervals
@@ -278,7 +279,7 @@ intervals(sleep.nonap.lapses)
 
 ``` r
 #SLEEP TIME ESTIMATES - no nap
-st.nonap.lapses <- nlme(lapses ~ b*(wake_time - crit*day_num)^theta,
+TST.nonap.lapses <- nlme(lapses ~ b*(TWT_tst - crit*day_num)^theta,
                    data = data.nonap,
                    fixed = b + theta + crit ~ 1,
                    random = crit ~ 1,
@@ -287,11 +288,11 @@ st.nonap.lapses <- nlme(lapses ~ b*(wake_time - crit*day_num)^theta,
                    na.action = na.omit
                    ) 
 
-summary(st.nonap.lapses)
+summary(TST.nonap.lapses)
 ```
 
     ## Nonlinear mixed-effects model fit by maximum likelihood
-    ##   Model: lapses ~ b * (wake_time - crit * day_num)^theta 
+    ##   Model: lapses ~ b * (TWT_tst - crit * day_num)^theta 
     ##   Data: data.nonap 
     ##        AIC      BIC    logLik
     ##   4406.687 4430.258 -2198.344
@@ -321,7 +322,7 @@ summary(st.nonap.lapses)
 ### Estimates and their 95% confidence intervals
 
 ``` r
-intervals(st.nonap.lapses)
+intervals(TST.nonap.lapses)
 ```
 
     ## Approximate 95% confidence intervals
@@ -343,7 +344,7 @@ intervals(st.nonap.lapses)
     ##    lower     est.    upper 
     ## 2.369793 2.502080 2.641752
 
-# Visualising the results
+# Visualising the results of TST based estimate
 
 ## Dot Plot - Critical Wake Durations across participants
 
@@ -377,28 +378,14 @@ al. (2018) estimates for the critical waking duration
 The line represents predicted number of lapses, dots represent the
 actual number of lapses observed.
 
-    ##              crit
-    ## NFS030  14.677828
-    ## NFS044  14.479284
-    ## NFS2032 13.915493
-    ## NFS4024 12.556731
-    ## NFS4031  9.806111
-    ## NFS4051 14.201569
-    ## NFS5117 14.806707
-
-    ##        0%       10%       20%       30%       40%       50%       60%       70% 
-    ##  9.806111 15.922690 16.363554 16.808173 17.122190 17.131346 17.277350 17.726688 
-    ##       80%       90%      100% 
-    ## 18.209184 18.657261 19.142896
-
     ## [1] 136
 
     ## [1] 136
 
 ![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
-To conclude, the estimate of critical waking duration (15.98) converged
-around the same as Van Dongen’s estimate (15.84). This seems to suggest
-that for the average adolescent (based on the sample used for this
-study), 8.02h of sleep would be sufficient to prevent the build of
-neurobehavioral deficits.
+To conclude, the estimate of critical waking duration (17.13) was
+greater than that of Van Dongen’s estimate (15.84). Our results seem to
+suggest that for the average adolescent (based on the sample used for
+this study), 6.87h of sleep would be sufficient to prevent the build of
+neurobehavioral deficits at least in the context of the PVT task.

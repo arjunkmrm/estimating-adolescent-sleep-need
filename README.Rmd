@@ -5,6 +5,7 @@ author: "Arjun Kumar"
 date: "9/22/2021"
 output: 
   github_document:
+    pandoc_args: --webtex
     dev: png
     toc: true
 ---
@@ -30,17 +31,12 @@ knitr::opts_chunk$set(knitr::opts_chunk$set(warning = FALSE, message = FALSE), e
 
 # The Dataset
 
-The dataset for this analysis comes from NFS1, NFS2, NFS4 and NFS5. Here is a section of the original dataset. Most of the columns have been ommitted for the sake of presentation here.
+The dataset for this analysis comes from NFS1, NFS2, NFS4 and NFS5. Here is a section of the original dataset. Most of the columns have been omitted for the sake of presentation here.
 
 ```{r, message=FALSE, echo=FALSE}
 
 library(tidyverse)
 library(rmarkdown)
-
-# rsq <- function(y, pred){
-#   r2 = cor(y, pred)^2
-#   return(r2)
-# }
 
 #load data
 data.nfs = read.csv("nfs.csv")
@@ -56,12 +52,12 @@ First, I select only the columns that are required for the analysis.
 
 #select only the required groups
 data.nfs = data.nfs %>% select(subj, day_num, group, lapses = pvt_lapses)
-data.nfs = data.nfs %>% na.omit() #remove na
+data.nfs = data.nfs %>% na.omit() #remove NAs
 print(head(data.nfs)) #view dataset
 
 ```
 
-Since participants did the PVT task thrice a day, I summarise the results to get the average PVT lapses for each day.
+Since participants did the PVT task three times a day, I summarised the results to get the average PVT lapses for each day.
 
 ```{r, message=FALSE, echo=FALSE}
 
@@ -72,7 +68,7 @@ print(head(data.nfs))
 
 ```
 
-Import sleep time data:
+I imported the TST data.
 
 ```{r, echo=FALSE}
 
@@ -151,6 +147,7 @@ nfs.tst <- nfs.tst %>% filter(subj %in% subj.nfs$subj)
 
 #nrow(data.nfs) == nrow(nfs.tst) #check if row count is same
 names(nfs.tst)[3] = "day_num" #name day column to match with that on data.nfs dataframe
+names(nfs.tst)[2] = "TST" #name sleep_time column to 'TST'
 
 print(head(nfs.tst))
 ```
@@ -170,22 +167,22 @@ I create a new column that denotes their bed time during the previous night. On 
 
 ```{r, echo=FALSE}
 
-#Create a new column 'ST' indicating sleep time on the previous night:
+#Create a new column 'TBT' indicating sleep time on the previous night:
 
 #NFS 1, nonap_5hx7 - data starts from day 1
 #day 1 is after baseline; 9, 10, 11 are after recovery nights
 data.nfs = data.nfs %>% 
-  mutate(ST = ifelse(group == "nonap_5hx7" & day_num %in% c(1, 9, 10, 11), 9.0, 0.0)) #assign 9h
+  mutate(TBT = ifelse(group == "nonap_5hx7" & day_num %in% c(1, 9, 10, 11), 9.0, 0.0)) #assign 9h
 
 #NFS 1, control group
 data.nfs = data.nfs %>% 
-  mutate(ST = ifelse(group == "control_9h", 9, ST))
+  mutate(TBT = ifelse(group == "control_9h", 9, TBT))
 
 #Other NFS - data starts from day 3
 #day 3 is baseline, 9, 10 are after the intermediate recovery nights
 #day 14 is the final recovery night
 data.nfs = data.nfs %>% 
-  mutate(ST = ifelse(group != "nonap_5hx7" & day_num %in% c(3, 9, 10, 14), 9.0, ST))
+  mutate(TBT = ifelse(group != "nonap_5hx7" & day_num %in% c(3, 9, 10, 14), 9.0, TBT))
 
 data.nfs <- data.nfs %>% mutate(day_num = ifelse(group %in% c("nonap_5hx7", "control_9h"), day_num + 2, day_num))#bring the baseline day to 3 for NFS 1
 
@@ -203,7 +200,7 @@ data.nfs$condition[data.nfs$group == "nap90_5h"] = as.numeric(6.5)
 data.nfs$condition[data.nfs$group == "nap90_6pt5h"] = as.numeric(8)
 
 data.nfs = data.nfs %>% 
-  mutate(ST = ifelse(ST == 0.0, as.numeric(condition), ST))#set ST for other days using sleep conditions
+  mutate(TBT = ifelse(TBT == 0.0, as.numeric(condition), TBT))#set TBT for other days using sleep conditions
 
 #align the day numbers between the different NFS together
 
@@ -219,11 +216,13 @@ Finally I calculate the cumulative wake duration for each participant
 
 #Calculate cumulative wake duration
 
+#based on TBT
 data.nfs = data.nfs %>% group_by(subj) %>% 
-  mutate(TWT = cumsum(24 - ST))
+  mutate(TWT_tbt = cumsum(24 - TBT))
 
+#based on TST
 data.nfs = data.nfs %>% group_by(subj) %>% 
-  mutate(wake_time = cumsum(24 - sleep_time))
+  mutate(TWT_tst = cumsum(24 - TST))
 
 #Filter only days until the first 6 days (1 baseline and 5 manipulation)
 data.nfs = data.nfs %>% filter(day_num <= 6)
@@ -317,7 +316,7 @@ I'm using the nlme() function from the nlme library to fit a nonlinear mixed eff
 ```{r, message=FALSE}
 
 library(nlme)
-sleep.nonap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
+TBT.nonap.lapses <- nlme(lapses ~ b*(TWT_tbt - crit*day_num)^theta,
                    data = data.nonap,
                    fixed = b + theta + crit ~ 1,
                    random = crit ~ 1,
@@ -326,7 +325,7 @@ sleep.nonap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
                    na.action = na.omit
                    ) 
 
-summary(sleep.nonap.lapses)
+summary(TBT.nonap.lapses)
 
 ```
 
@@ -334,7 +333,7 @@ summary(sleep.nonap.lapses)
 
 ```{r, message=FALSE}
 
-intervals(sleep.nonap.lapses)
+intervals(TBT.nonap.lapses)
 
 ```
 
@@ -344,7 +343,7 @@ intervals(sleep.nonap.lapses)
 ```{r, message=FALSE}
 
 #SLEEP TIME ESTIMATES - no nap
-st.nonap.lapses <- nlme(lapses ~ b*(wake_time - crit*day_num)^theta,
+TST.nonap.lapses <- nlme(lapses ~ b*(TWT_tst - crit*day_num)^theta,
                    data = data.nonap,
                    fixed = b + theta + crit ~ 1,
                    random = crit ~ 1,
@@ -353,7 +352,7 @@ st.nonap.lapses <- nlme(lapses ~ b*(wake_time - crit*day_num)^theta,
                    na.action = na.omit
                    ) 
 
-summary(st.nonap.lapses)
+summary(TST.nonap.lapses)
 
 ```
 
@@ -361,24 +360,24 @@ summary(st.nonap.lapses)
 
 ```{r, message=FALSE}
 
-intervals(st.nonap.lapses)
+intervals(TST.nonap.lapses)
 
 ```
 
-# Visualising the results
+# Visualising the results of TST based estimate
 ## Dot Plot - Critical Wake Durations across participants
 
 ```{r, echo = FALSE, message=FALSE, fig.height = 3, fig.width=5, dpi=300}
 
 #extract critical wake duration
-crit <- st.nonap.lapses$coefficients$random$subj + st.nonap.lapses$coefficients$fixed[3]
+crit <- TST.nonap.lapses$coefficients$random$subj + TST.nonap.lapses$coefficients$fixed[3]
 crit <- data.frame(crit)
 
 crit$id <- 1:nrow(crit)
 
 ggplot(crit, aes(x = crit, y = id)) +
   geom_point(alpha = 0.5, color = "darkgreen") +
-  geom_vline(xintercept = st.nonap.lapses$coefficients$fixed[3], color = "navyblue", linetype = 2, size = 0.7) +
+  geom_vline(xintercept = TST.nonap.lapses$coefficients$fixed[3], color = "navyblue", linetype = 2, size = 0.7) +
   labs(x = "critical waking duration", y = "id")
 ```
 
@@ -387,7 +386,7 @@ ggplot(crit, aes(x = crit, y = id)) +
 ```{r, echo = FALSE, message=FALSE, fig.height = 3, fig.width=5, dpi=300}
 
 #extract sd of random effects
-sdcrit <- intervals(st.nonap.lapses)
+sdcrit <- intervals(TST.nonap.lapses)
 sdcrit <- sdcrit$reStruct$subj$est.
 
 qqnorm(crit$crit, pch = 1, frame = FALSE)
@@ -412,7 +411,7 @@ ggplot(crit, aes(x = crit)) +
 
 ```{r, echo = FALSE, message=FALSE, fig.height = 3, fig.width=5, dpi=300}
 
-plot(st.nonap.lapses)
+plot(TST.nonap.lapses)
 
 ```
 
@@ -426,7 +425,7 @@ There are clearly some outliers having oversized influence on the distribution. 
 #plot different estimates
 ggplot(crit, aes(x = crit)) +
   #stat_function(fun = dnorm, args = list(15.88, 1.42), color = "red", size = 1, alpha = 0.5) +
-  geom_area(stat = "function", fun = dnorm, args = list(mean = st.nonap.lapses$coefficients$fixed[3], sd = sdcrit), aes(fill = "NFS, age: 15 - 19"), alpha = 0.2) +
+  geom_area(stat = "function", fun = dnorm, args = list(mean = TST.nonap.lapses$coefficients$fixed[3], sd = sdcrit), aes(fill = "NFS, age: 15 - 19"), alpha = 0.2) +
   geom_area(stat = "function", fun = dnorm, args = list(mean = 15.82, sd = 3.84), aes(fill = "Van Dongen et al., age: 21 - 38"), alpha = 0.2)+
   geom_area(stat = "function", fun = dnorm, args = list(mean = 14.65, sd = 4.14), aes(fill = "Short et al., age: 15 - 17"),  alpha = 0.2)
 
@@ -461,15 +460,15 @@ The line represents predicted number of lapses, dots represent the actual number
 #   labs(x = "excess wakefulness", y = "mean lapses", title = "Mean Lapses vs Excess Wakefulness", color = "condition")
 
 #lapses predictions
-data.nonap$plapses = predict(st.nonap.lapses, data.nonap)
+data.nonap$plapses = predict(TST.nonap.lapses, data.nonap)
 data.nonap$plapses[is.nan(data.nonap$plapses)] <- 0.0
 
 #graphing lapses vs excess
-crit.lapses <- st.nonap.lapses$coefficients$random$subj + st.nonap.lapses$coefficients$fixed[3]
+crit.lapses <- TST.nonap.lapses$coefficients$random$subj + TST.nonap.lapses$coefficients$fixed[3]
 crit.lapses <- data.frame(crit.lapses)
 
-crit.lapses %>% filter(crit < 15)
-quantile(crit.lapses$crit, seq(0, 1, 0.10))
+#crit.lapses %>% filter(crit < 15)
+#quantile(crit.lapses$crit, seq(0, 1, 0.10))
 
 # crit.lapses = crit.lapses %>% 
 #   mutate(z_latency = as.vector(scale(crit)))
@@ -496,17 +495,17 @@ nrow(crit.lapses)
 
 crit.lapses = rep(crit.lapses$crit, each = 6)
 data.nonap = cbind(data.nonap, critical.lapses = crit.lapses)
-data.nonap = data.nonap %>% mutate(excess.lapses = TWT - critical.lapses*day_num)
+data.nonap = data.nonap %>% mutate(excess.lapses = TWT_tst - critical.lapses*day_num)
 
 data.nonap = data.nonap %>% mutate(excess.lapses = ifelse(excess.lapses < 0, 0, excess.lapses))
 
 ggplot(data.nonap, aes(x = excess.lapses, y = lapses)) +
   stat_summary(fun = mean, geom = "point", aes(group = as.factor(condition), color = as.factor(condition)), alpha = 0.3) +
  # geom_smooth(color = "black") +
-  stat_summary(fun = mean, geom = "point", aes(y = plapses), size = 1, alpha = 0.5) +
+  stat_summary(fun = mean, geom = "line", aes(y = plapses), size = 1, alpha = 0.5) +
   #geom_line(aes(y = pred, group = subj)) +
   labs(x = "excess wakefulness", y = "mean lapses", title = "Mean Lapses vs Excess Wakefulness", color = "condition")
 
 ```
 
-To conclude, the estimate of critical waking duration (15.98) converged around the same as Van Dongen's estimate (15.84). This seems to suggest that for the average adolescent (based on the sample used for this study), 8.02h of sleep would be sufficient to prevent the build of neurobehavioral deficits.
+To conclude, the estimate of critical waking duration (17.13) was greater than that of Van Dongen's estimate (15.84). Our results seem to suggest that for the average adolescent (based on the sample used for this study), 6.87h of sleep would be sufficient to prevent the build of neurobehavioral deficits at least in the context of the PVT task.
