@@ -127,14 +127,14 @@ nfs.tst <- nfs.tst %>% filter(ifelse(study == "NFS1", day != 1, day > 0))
 nfs.tst <- nfs.tst %>% mutate(day = ifelse(study == "NFS1", day - 1, day))
 
 #fix the timeline in the same way for NFS2
-nfs.tst %>% group_by(subj) %>% filter(study == "NFS2")
+#nfs.tst %>% group_by(subj) %>% filter(study == "NFS2")
 nfs.tst <- nfs.tst %>% filter(ifelse(study == "NFS2", day %in% c(3 : 14), day > 0))
 
 #fix the timeline for NFS4 and NFS5
-nfs.tst %>% group_by(subj) %>% filter(study == "NFS4")
+#nfs.tst %>% group_by(subj) %>% filter(study == "NFS4")
 nfs.tst <- nfs.tst %>% filter(ifelse(study == "NFS4", day %in% c(2 : 13), day > 0))
 
-nfs.tst %>% group_by(subj) %>% filter(study == "NFS5")
+#nfs.tst %>% group_by(subj) %>% filter(study == "NFS5")
 nfs.tst <- nfs.tst %>% filter(ifelse(study == "NFS5", day %in% c(2 : 13), day > 0))
 
 nfs.tst <- nfs.tst %>% mutate(day = ifelse(study %in% c("NFS4", "NFS5"), day + 1, day))

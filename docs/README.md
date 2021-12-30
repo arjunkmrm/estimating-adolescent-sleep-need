@@ -113,54 +113,6 @@ results to get the average PVT lapses for each day.
 
 Import sleep time data:
 
-    ## # A tibble: 855 × 4
-    ## # Groups:   subj [57]
-    ##    subj    sleep_time   day study
-    ##    <chr>   <chr>      <dbl> <chr>
-    ##  1 NFS2001 8.12           1 NFS2 
-    ##  2 NFS2001 8.40           2 NFS2 
-    ##  3 NFS2001 8.50           3 NFS2 
-    ##  4 NFS2001 4.62           4 NFS2 
-    ##  5 NFS2001 4.43           5 NFS2 
-    ##  6 NFS2001 4.68           6 NFS2 
-    ##  7 NFS2001 4.55           7 NFS2 
-    ##  8 NFS2001 4.45           8 NFS2 
-    ##  9 NFS2001 8.37           9 NFS2 
-    ## 10 NFS2001 8.20          10 NFS2 
-    ## # … with 845 more rows
-
-    ## # A tibble: 796 × 4
-    ## # Groups:   subj [57]
-    ##    subj    sleep_time   day study
-    ##    <chr>   <chr>      <dbl> <chr>
-    ##  1 NFS4004 484            1 NFS4 
-    ##  2 NFS4004 460            2 NFS4 
-    ##  3 NFS4004 358.5          3 NFS4 
-    ##  4 NFS4004 359.5          4 NFS4 
-    ##  5 NFS4004 364.5          5 NFS4 
-    ##  6 NFS4004 370.5          6 NFS4 
-    ##  7 NFS4004 354            7 NFS4 
-    ##  8 NFS4004 504            8 NFS4 
-    ##  9 NFS4004 467.5          9 NFS4 
-    ## 10 NFS4004 353.5         10 NFS4 
-    ## # … with 786 more rows
-
-    ## # A tibble: 756 × 4
-    ## # Groups:   subj [54]
-    ##    subj    sleep_time   day study
-    ##    <chr>   <chr>      <dbl> <chr>
-    ##  1 NFS5003 498.5          1 NFS5 
-    ##  2 NFS5003 499            2 NFS5 
-    ##  3 NFS5003 365            3 NFS5 
-    ##  4 NFS5003 353.5          4 NFS5 
-    ##  5 NFS5003 353            5 NFS5 
-    ##  6 NFS5003 266            6 NFS5 
-    ##  7 NFS5003 282.5          7 NFS5 
-    ##  8 NFS5003 466.5          8 NFS5 
-    ##  9 NFS5003 225.5          9 NFS5 
-    ## 10 NFS5003 325           10 NFS5 
-    ## # … with 746 more rows
-
     ##     subj sleep_time day_num study
     ## 1 NFS001       7.17       1  NFS1
     ## 2 NFS001       3.47       2  NFS1
