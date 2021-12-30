@@ -374,16 +374,12 @@ al. (2018) estimates for the critical waking duration
 
 ## Mean lapses vs excess wakefulness
 
-![lapses = 3.62\*(excess)^{0.67}](https://latex.codecogs.com/png.latex?lapses%20%3D%203.62%2A%28excess%29%5E%7B0.67%7D "lapses = 3.62*(excess)^{0.67}")
-
 The line represents predicted number of lapses, dots represent the
 actual number of lapses observed.
 
 ![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 ## Predicted Lapses vs Day
-
-![lapses = 3.62\*(CWT - 17.13\*day)^{0.67}](https://latex.codecogs.com/png.latex?lapses%20%3D%203.62%2A%28CWT%20-%2017.13%2Aday%29%5E%7B0.67%7D "lapses = 3.62*(CWT - 17.13*day)^{0.67}")
 
 ![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 

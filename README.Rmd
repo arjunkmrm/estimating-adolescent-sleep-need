@@ -431,12 +431,10 @@ ggplot(crit, aes(x = crit)) +
 
 ## Mean lapses vs excess wakefulness
 
-$$lapses = 3.62*(excess)^{0.67}$$
-
 The line represents predicted number of lapses, dots represent the actual number of lapses observed.
 
 ```{r, echo = FALSE, message=FALSE, fig.height = 4, fig.width=6, dpi=300}
-
+#$$lapses = 3.62*(excess)^{0.67}$$
 # #lapses predictions
 # data.nonap$plapses = predict(sleep.nonap.lapses, data.nonap)
 # data.nonap$plapses[is.nan(data.nonap$plapses)] <- 0.0
@@ -509,10 +507,8 @@ ggplot(data.nonap, aes(x = excess.lapses, y = lapses)) +
 
 ## Predicted Lapses vs Day
 
-$$lapses = 3.62*(CWT - 17.13*day)^{0.67}$$
-
 ```{r, echo = FALSE, message=FALSE, fig.height = 6, fig.width=10, dpi=300}
-
+#$$lapses = 3.62*(CWT - 17.13*day)^{0.67}$$
 #mean lapses vs day
 
 ggplot(data.nonap, aes(x = day_num, y = excess.lapses, color = as.factor(condition))) +
