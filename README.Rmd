@@ -1,6 +1,9 @@
 ---
 title: Estimating the sleep need of adolescents using nonlinear mixed effects modelling
+author: Arjun Kumar
 output: 
+  pdf_document:
+    toc: true
   github_document:
     pandoc_args: --webtex
     dev: png
