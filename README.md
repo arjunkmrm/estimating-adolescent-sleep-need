@@ -272,9 +272,7 @@ summary(TBT.nonap.lapses)
     ## Number of Observations: 824
     ## Number of Groups: 139
 
-``` r
-rmse(TBT.nonap.lapses, data.nfs)
-```
+#### RMSE
 
     ## [1] 3.151056
 
@@ -349,9 +347,7 @@ summary(TST.nonap.lapses)
     ## Number of Observations: 824
     ## Number of Groups: 139
 
-``` r
-rmse(TBT.nonap.lapses, data.nfs)
-```
+#### RMSE
 
     ## [1] 3.151056
 
@@ -384,21 +380,21 @@ intervals(TST.nonap.lapses)
 
 ### Dot Plot - Critical Wake Durations across participants
 
-![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ### QQ Plot - Normality of distribution
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ### Histogram - Normality of distribution
 
 The plot indicates a left skew. I checked the histogram
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 ### Residuals Plot
 
-![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 ### Comparison against estimates based on the literature
 
@@ -406,7 +402,7 @@ I compared the distribution obtained from this estimate with Van Dongen
 et al.(2003) and Short et al. (2018) estimates for the critical waking
 duration
 
-![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 ### Mean lapses vs excess wakefulness
 
@@ -415,13 +411,13 @@ duration
 The line represents predicted number of lapses, dots represent the
 actual number of lapses observed.
 
-![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 ### Predicted Lapses vs Day
 
 ![lapses = 3.62\*(CWT - 17.13\*day)^{0.67}](https://latex.codecogs.com/png.latex?lapses%20%3D%203.62%2A%28CWT%20-%2017.13%2Aday%29%5E%7B0.67%7D "lapses = 3.62*(CWT - 17.13*day)^{0.67}")
 
-![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 To conclude, the estimate of critical waking duration (17.13) was
 greater than that of Van Dongen’s estimate (15.84). Our results seem to
@@ -530,7 +526,7 @@ Final dataset after cleaning
 
 ### mean lapses against time awake (from sleep at night or nap)
 
-<img src="README_files/figure-gfm/unnamed-chunk-28-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-gfm/unnamed-chunk-30-1.png" style="display: block; margin: auto;" />
 
 ### Mean lapses vs Day
 
@@ -546,7 +542,7 @@ ggplot(aes(x = day_num, y = lapses, color = as.factor(test))) +
   facet_grid(~ type ~condition) 
 ```
 
-<img src="README_files/figure-gfm/unnamed-chunk-29-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-gfm/unnamed-chunk-31-1.png" style="display: block; margin: auto;" />
 
 ## Estimating Sleep Need
 
@@ -728,18 +724,18 @@ summary(sleep.nonap.lapses)
 
 ### Dot Plot - Critical Wake Durations across participants
 
-![](README_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
 
 ### QQ Plot - Normality of distribution
 
-![](README_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
 
 ### Histogram - Normality of distribution
 
 The plot indicates a left skew. I checked the histogram
 
-![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
 
 ### Residuals Plot
 
-![](README_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->

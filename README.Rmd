@@ -325,6 +325,12 @@ TBT.nonap.lapses <- nlme(lapses ~ b*(TWT_tbt - crit*day_num)^theta,
                    ) 
 
 summary(TBT.nonap.lapses)
+```
+
+#### RMSE
+
+```{r, message=FALSE, echo=FALSE}
+
 rmse(TBT.nonap.lapses, data.nfs)
 
 ```
@@ -353,6 +359,13 @@ TST.nonap.lapses <- nlme(lapses ~ b*(TWT_tst - crit*day_num)^theta,
                    ) 
 
 summary(TST.nonap.lapses)
+
+```
+
+#### RMSE
+
+```{r, message=FALSE, echo=FALSE}
+
 rmse(TBT.nonap.lapses, data.nfs)
 
 ```
@@ -858,7 +871,7 @@ crit <- data.frame(crit)
 crit$id <- 1:nrow(crit)
 
 ggplot(crit, aes(x = crit, y = id)) +
-  geom_point(alpha = 0.5, size = 0.5, color = "darkgreen") +
+  geom_point(alpha = 0.5, size = 0.8, color = "darkgreen") +
   geom_vline(xintercept = sleep.allconditions.lapses$coefficients$fixed[3], color = "navyblue", linetype = 2, size = 0.7) +
   labs(x = "critical waking duration", y = "id")
 ```
