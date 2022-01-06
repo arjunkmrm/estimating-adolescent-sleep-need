@@ -377,7 +377,7 @@ crit <- data.frame(crit)
 crit$id <- 1:nrow(crit)
 
 ggplot(crit, aes(x = crit, y = id)) +
-  geom_point(alpha = 0.5, size = 0.5, color = "darkgreen") +
+  geom_point(alpha = 0.5, size = 0.8, color = "darkgreen") +
   geom_vline(xintercept = TST.nonap.lapses$coefficients$fixed[3], color = "navyblue", linetype = 2, size = 0.7) +
   labs(x = "critical waking duration", y = "id")
 ```
@@ -398,7 +398,7 @@ qqline(crit$crit, col = "steelblue", lwd = 2)
 
 ### Histogram - Normality of distribution
 
-The plot indicates a left skew. Let's check the histogram
+The plot indicates a left skew. I checked the histogram
 
 ```{r, echo = FALSE, message=FALSE, fig.height = 3, fig.width=5, dpi=300}
 
@@ -503,7 +503,7 @@ data.nonap = data.nonap %>% mutate(excess.lapses = TWT_tst - critical.lapses*day
 data.nonap = data.nonap %>% mutate(excess.lapses = ifelse(excess.lapses < 0, 0, excess.lapses))
 
 ggplot(data.nonap, aes(x = excess.lapses, y = lapses)) +
-  stat_summary(fun = mean, geom = "point", aes(group = as.factor(condition), color = as.factor(condition)), alpha = 0.3, size = 0.5) +
+  stat_summary(fun = mean, geom = "point", aes(group = as.factor(condition), color = as.factor(condition)), alpha = 0.3, size = 0.8) +
  # geom_smooth(color = "black") +
   stat_summary(fun = mean, geom = "line", aes(y = plapses), size = 1, alpha = 0.5) +
   #geom_line(aes(y = pred, group = subj)) +
@@ -879,7 +879,7 @@ qqline(crit$crit, col = "steelblue", lwd = 2)
 
 ### Histogram - Normality of distribution
 
-The plot indicates a left skew. I check the histogram
+The plot indicates a left skew. I checked the histogram
 
 ```{r, echo = FALSE, message=FALSE, fig.height = 3, fig.width=5, dpi=300}
 

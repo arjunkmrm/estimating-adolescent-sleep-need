@@ -392,7 +392,7 @@ intervals(TST.nonap.lapses)
 
 ### Histogram - Normality of distribution
 
-The plot indicates a left skew. Let’s check the histogram
+The plot indicates a left skew. I checked the histogram
 
 ![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
@@ -736,7 +736,7 @@ summary(sleep.nonap.lapses)
 
 ### Histogram - Normality of distribution
 
-The plot indicates a left skew. I check the histogram
+The plot indicates a left skew. I checked the histogram
 
 ![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
 
