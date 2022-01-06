@@ -313,7 +313,7 @@ ggplot(data.nonap, aes(x = day_num, y = lapses, color = as.factor(condition))) +
 I'm using the nlme() function from the nlme library to fit a nonlinear mixed effects model to my data.
 
 ```{r, message=FALSE}
-
+library(modelr) #for RMSE
 library(nlme)
 TBT.nonap.lapses <- nlme(lapses ~ b*(TWT_tbt - crit*day_num)^theta,
                    data = data.nonap,
@@ -325,6 +325,7 @@ TBT.nonap.lapses <- nlme(lapses ~ b*(TWT_tbt - crit*day_num)^theta,
                    ) 
 
 summary(TBT.nonap.lapses)
+rmse(TBT.nonap.lapses, data.nfs)
 
 ```
 
@@ -352,6 +353,7 @@ TST.nonap.lapses <- nlme(lapses ~ b*(TWT_tst - crit*day_num)^theta,
                    ) 
 
 summary(TST.nonap.lapses)
+rmse(TBT.nonap.lapses, data.nfs)
 
 ```
 
@@ -366,7 +368,7 @@ intervals(TST.nonap.lapses)
 ## Visualising the results of TST based estimate
 ### Dot Plot - Critical Wake Durations across participants
 
-```{r, echo = FALSE, message=FALSE, fig.height = 3, fig.width=5, dpi=300}
+```{r, echo = FALSE, message=FALSE, fig.height = 5, fig.width=8, dpi=300}
 
 #extract critical wake duration
 crit <- TST.nonap.lapses$coefficients$random$subj + TST.nonap.lapses$coefficients$fixed[3]
@@ -375,14 +377,14 @@ crit <- data.frame(crit)
 crit$id <- 1:nrow(crit)
 
 ggplot(crit, aes(x = crit, y = id)) +
-  geom_point(alpha = 0.5, color = "darkgreen") +
+  geom_point(alpha = 0.5, size = 0.5, color = "darkgreen") +
   geom_vline(xintercept = TST.nonap.lapses$coefficients$fixed[3], color = "navyblue", linetype = 2, size = 0.7) +
   labs(x = "critical waking duration", y = "id")
 ```
 
 ### QQ Plot - Normality of distribution
 
-```{r, echo = FALSE, message=FALSE, fig.height = 3, fig.width=5, dpi=300}
+```{r, echo = FALSE, message=FALSE, fig.height = 5, fig.width=8, dpi=300}
 
 #extract sd of random effects
 sdcrit <- intervals(TST.nonap.lapses)
@@ -408,9 +410,9 @@ ggplot(crit, aes(x = crit)) +
 
 ### Residuals Plot
 
-```{r, echo = FALSE, message=FALSE, fig.height = 3, fig.width=5, dpi=300}
+```{r, echo = FALSE, message=FALSE, fig.height = 5, fig.width=8, dpi=300}
 
-plot(TST.nonap.lapses)
+plot(TST.nonap.lapses, cex=0.5)
 
 ```
 
@@ -437,7 +439,7 @@ $$lapses = 3.62*(excess)^{0.67}$$
 
 The line represents predicted number of lapses, dots represent the actual number of lapses observed.
 
-```{r, echo = FALSE, message=FALSE, fig.height = 4, fig.width=6, dpi=300}
+```{r, echo = FALSE, message=FALSE, fig.height = 5, fig.width=8, dpi=300}
 
 # #lapses predictions
 # data.nonap$plapses = predict(sleep.nonap.lapses, data.nonap)
@@ -501,7 +503,7 @@ data.nonap = data.nonap %>% mutate(excess.lapses = TWT_tst - critical.lapses*day
 data.nonap = data.nonap %>% mutate(excess.lapses = ifelse(excess.lapses < 0, 0, excess.lapses))
 
 ggplot(data.nonap, aes(x = excess.lapses, y = lapses)) +
-  stat_summary(fun = mean, geom = "point", aes(group = as.factor(condition), color = as.factor(condition)), alpha = 0.3) +
+  stat_summary(fun = mean, geom = "point", aes(group = as.factor(condition), color = as.factor(condition)), alpha = 0.3, size = 0.5) +
  # geom_smooth(color = "black") +
   stat_summary(fun = mean, geom = "line", aes(y = plapses), size = 1, alpha = 0.5) +
   #geom_line(aes(y = pred, group = subj)) +
@@ -720,7 +722,7 @@ ggplot(aes(x = WD, y = lapses)) +
 
 ### Mean lapses vs Day
 
-```{r, message=FALSE, fig.align="center"}
+```{r, message=FALSE, fig.align="center", fig.width=8, fig.height=8}
 
 #mean lapses vs Day
 
@@ -730,28 +732,20 @@ ggplot(aes(x = day_num, y = lapses, color = as.factor(test))) +
    stat_summary(fun = mean, geom = "point") +
    #stat_summary(fun.data = mean_cl_normal, geom = "errorbar", aes(group = as.factor(condition)), width = 0.05) +
    labs(x = "day", y = "mean lapses", title = " ", color = "test") +
-  facet_wrap(~ group)
-
+  facet_grid(~ type ~condition) 
 
 
 ```
 
 ## Estimating Sleep Need
 ### All conditions
+#### Summary
 
 ```{r, message=FALSE}
 
 library(nlme)
 
-# sleep.lme <- lmer(lapses ~ day_num + test + (day_num | id) + (day_num | group) , data.nfs)
-# 
-# sleep.lme
-# plot(sleep.lme)
-
 #inclusive of nap conditions
-
-library(modelr)
-
 sleep.allconditions.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
                    data = data.nfs,
                    fixed = b + crit + theta ~ 1,
@@ -763,16 +757,29 @@ sleep.allconditions.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
 
 summary(sleep.allconditions.lapses)
 
+```
+
+#### RMSE
+
+```{r, message=FALSE, echo=FALSE}
 rmse(sleep.allconditions.lapses, data.nfs)
 
 ```
 
-### Only no nap conditions
+#### Estimates and their 95% confidence intervals
 
-```{r}
+```{r, echo=FALSE,message=FALSE}
+
+intervals(sleep.allconditions.lapses, which = 'fixed')
+
+```
+
+### Only no nap conditions
+#### Summary
+
+```{r, message=FALSE}
 
 #no nap
-
 sleep.nonap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
                    data = data.nonap,
                    fixed = b + crit + theta ~ 1,
@@ -784,20 +791,211 @@ sleep.nonap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
 
 summary(sleep.nonap.lapses)
 
-rmse(sleep.nonap.lapses, data.nonap)
+```
 
-#nap only
-# 
-# sleep.nap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
-#                    data = data.nap,
-#                    fixed = b + crit + theta ~ 1,
-#                    random = crit ~ 1,
-#                    groups = ~ subj,
-#                    start = c(b = 2, crit = 14, theta = 0.6),
-#                    na.action = na.omit
-#                    )
-# 
-# summary(sleep.nap.lapses)
+#### RMSE
+
+```{r, message=FALSE, echo=FALSE}
+
+rmse(sleep.nonap.lapses, data.nonap)
 
 ``` 
 
+#### Estimates and their 95% confidence intervals
+
+```{r, message=FALSE, echo=FALSE}
+
+intervals(sleep.nonap.lapses, which = 'fixed')
+
+```
+
+### Only nap conditions
+#### Summary
+
+```{r, echo=FALSE, message=FALSE}
+
+library(nlme)
+
+#inclusive of nap conditions
+sleep.onlynap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
+                   data = data.nap,
+                   fixed = b + crit + theta ~ 1,
+                   random = crit ~ 1,
+                   groups = ~ subj,
+                   start = c(b = 1, crit = 12, theta = 0.4),
+                   na.action = na.omit
+                   )
+
+summary(sleep.onlynap.lapses)
+```
+
+#### RMSE
+
+```{r, message=FALSE, echo=FALSE}
+
+rmse(sleep.onlynap.lapses, data.nap)
+
+```
+
+#### Estimates and their 95% confidence intervals
+
+```{r, message=FALSE, echo=FALSE}
+
+intervals(sleep.onlynap.lapses, which = 'fixed')
+
+```
+
+## Visualising the results of TBT based estimate - all conditions
+### Dot Plot - Critical Wake Durations across participants
+
+```{r, echo = FALSE, message=FALSE, fig.height = 5, fig.width=8, dpi=300}
+
+#extract critical wake duration
+crit <- data.frame()
+crit <- sleep.allconditions.lapses$coefficients$random$subj + sleep.allconditions.lapses$coefficients$fixed[3]
+crit <- data.frame(crit)
+
+crit$id <- 1:nrow(crit)
+
+ggplot(crit, aes(x = crit, y = id)) +
+  geom_point(alpha = 0.5, size = 0.5, color = "darkgreen") +
+  geom_vline(xintercept = sleep.allconditions.lapses$coefficients$fixed[3], color = "navyblue", linetype = 2, size = 0.7) +
+  labs(x = "critical waking duration", y = "id")
+```
+
+### QQ Plot - Normality of distribution
+
+```{r, echo = FALSE, message=FALSE, fig.height = 5, fig.width=8, dpi=300}
+
+#extract sd of random effects
+sdcrit <- intervals(sleep.allconditions.lapses, which='fixed')
+sdcrit <- sdcrit$reStruct$subj$est.
+
+qqnorm(crit$crit, pch = 1, frame = FALSE)
+qqline(crit$crit, col = "steelblue", lwd = 2)
+
+
+```
+
+### Histogram - Normality of distribution
+
+The plot indicates a left skew. I check the histogram
+
+```{r, echo = FALSE, message=FALSE, fig.height = 3, fig.width=5, dpi=300}
+
+
+ggplot(crit, aes(x = crit)) +
+  geom_histogram(bins = 50, fill = "black", color = "white", alpha = 0.8, aes(y = ..count..)) 
+
+```
+
+### Residuals Plot
+
+```{r, echo = FALSE, message=FALSE, fig.height = 5, fig.width=8, dpi=300}
+
+plot(sleep.allconditions.lapses, cex=0.5)
+
+```
+
+
+
+```{r, eval=FALSE, echo = FALSE, message=FALSE, fig.height = 4, fig.width=6, dpi=300}
+
+
+#plot different estimates
+ggplot(crit, aes(x = crit)) +
+  #stat_function(fun = dnorm, args = list(15.88, 1.42), color = "red", size = 1, alpha = 0.5) +
+  geom_area(stat = "function", fun = dnorm, args = list(mean = sleep.allconditions.lapses$coefficients$fixed[3], sd = sdcrit), aes(fill = "NFS, age: 15 - 19"), alpha = 0.2) +
+  geom_area(stat = "function", fun = dnorm, args = list(mean = 15.82, sd = 3.84), aes(fill = "Van Dongen et al., age: 21 - 38"), alpha = 0.2)+
+  geom_area(stat = "function", fun = dnorm, args = list(mean = 14.65, sd = 4.14), aes(fill = "Short et al., age: 15 - 17"),  alpha = 0.2)
+
+
+```
+
+
+
+```{r, eval=FALSE, echo = FALSE, message=FALSE, fig.height = 5, fig.width=8, dpi=300}
+
+# #lapses predictions
+# data.nonap$plapses = predict(sleep.nonap.lapses, data.nonap)
+# data.nonap$plapses[is.nan(data.nonap$plapses)] <- 0.0
+# 
+# #graphing lapses vs excess
+# crit.lapses <- sleep.nonap.lapses$coefficients$random$subj + sleep.nonap.lapses$coefficients$fixed[3]
+# crit.lapses <- data.frame(crit.lapses)
+# 
+# crit.lapses = rep(crit.lapses$crit, each = 6)
+# data.nonap = cbind(data.nonap, critical.lapses = crit.lapses)
+# data.nonap = data.nonap %>% mutate(excess.lapses = TWT - critical.lapses*day_num)
+# 
+# data.nonap = data.nonap %>% mutate(excess.lapses = ifelse(excess.lapses < 0, 0, excess.lapses))
+# 
+# ggplot(data.nonap, aes(x = excess.lapses, y = lapses)) +
+#   stat_summary(fun = mean, geom = "point", aes(group = as.factor(condition), color = as.factor(condition)), alpha = 0.3) +
+#  # geom_smooth(color = "black") +
+#   stat_summary(fun = mean, geom = "line", aes(y = plapses), size = 1, alpha = 0.5) +
+#   #geom_line(aes(y = pred, group = subj)) +
+#   labs(x = "excess wakefulness", y = "mean lapses", title = "Mean Lapses vs Excess Wakefulness", color = "condition")
+
+#lapses predictions
+data.nonap$plapses = predict(sleep.allconditions.lapses, data.nonap)
+data.nonap$plapses[is.nan(data.nonap$plapses)] <- 0.0
+
+#graphing lapses vs excess
+crit.lapses <- sleep.allconditions.lapses$coefficients$random$subj + sleep.allconditions.lapses$coefficients$fixed[3]
+crit.lapses <- data.frame(crit.lapses)
+
+#crit.lapses %>% filter(crit < 15)
+#quantile(crit.lapses$crit, seq(0, 1, 0.10))
+
+# crit.lapses = crit.lapses %>% 
+#   mutate(z_latency = as.vector(scale(crit)))
+# crit.lapses = crit.lapses %>%  filter(z_latency < -2)
+
+crit.names <- data.frame(subj = rownames(crit.lapses))
+crit.lapses$subj <- crit.names$subj
+
+subj.irreg <- data.nonap %>% group_by(subj) %>% count() %>% filter(n < 6) %>% select(subj)
+data.nonap <- data.nonap %>% filter(!subj %in% c("NFS2073", "NFS4042", "NFS5063"))
+
+crit.lapses <- crit.lapses %>% filter(!subj %in% c("NFS2073", "NFS4042", "NFS5063"))
+
+#filtering to match participants in both datasets
+
+subj.nonap <-  data.nonap %>% group_by(subj) %>% count() %>% select(subj)
+crit.lapses <- crit.lapses %>% filter(subj %in% subj.nonap$subj)
+subj.crit <-  crit.lapses %>% group_by(subj) %>% count() %>% select(subj)
+data.nonap <- data.nonap %>% filter(subj %in% subj.crit$subj)
+
+
+#nrow(data.nonap)/6
+#nrow(crit.lapses)
+
+crit.lapses = rep(crit.lapses$crit, each = 18)
+data.nonap = cbind(data.nonap, critical.lapses = crit.lapses)
+data.nonap = data.nonap %>% mutate(excess.lapses = TWT_tst - critical.lapses*day_num)
+
+data.nonap = data.nonap %>% mutate(excess.lapses = ifelse(excess.lapses < 0, 0, excess.lapses))
+
+ggplot(data.nonap, aes(x = excess.lapses, y = lapses)) +
+  stat_summary(fun = mean, geom = "point", aes(group = as.factor(condition), color = as.factor(condition)), alpha = 0.3, size = 0.5) +
+ # geom_smooth(color = "black") +
+  stat_summary(fun = mean, geom = "line", aes(y = plapses), size = 1, alpha = 0.5) +
+  #geom_line(aes(y = pred, group = subj)) +
+  labs(x = "excess wakefulness", y = "mean lapses", color = "condition") + theme_minimal()
+
+```
+
+
+
+```{r, eval=FALSE, echo = FALSE, message=FALSE, fig.height = 6, fig.width=10, dpi=300}
+
+#mean lapses vs day
+
+ggplot(data.nonap, aes(x = day_num, y = excess.lapses, color = as.factor(condition))) +
+   stat_summary(fun = mean, geom = "line", size = 1, alpha = 0.5) +
+   #geom_jitter(aes(y = lapses), alpha = 0.3) +
+   stat_summary(fun.data = mean_cl_normal, geom = "errorbar", aes(group = as.factor(condition)), width = 0.05) +
+   labs(x = "day", y = "mean lapses", title = " ", color = "condition") + theme_minimal()
+
+```

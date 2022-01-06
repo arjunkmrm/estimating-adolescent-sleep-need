@@ -42,6 +42,16 @@ Arjun Kumar
     -   [Estimating Sleep Need](#estimating-sleep-need-1)
         -   [All conditions](#all-conditions)
         -   [Only no nap conditions](#only-no-nap-conditions)
+        -   [Only nap conditions](#only-nap-conditions)
+    -   [Visualising the results of TBT based estimate - all
+        conditions](#visualising-the-results-of-tbt-based-estimate---all-conditions)
+        -   [Dot Plot - Critical Wake Durations across
+            participants](#dot-plot---critical-wake-durations-across-participants-1)
+        -   [QQ Plot - Normality of
+            distribution](#qq-plot---normality-of-distribution-1)
+        -   [Histogram - Normality of
+            distribution](#histogram---normality-of-distribution-1)
+        -   [Residuals Plot](#residuals-plot-1)
 
 # Introduction
 
@@ -220,6 +230,7 @@ I’m using the nlme() function from the nlme library to fit a nonlinear
 mixed effects model to my data.
 
 ``` r
+library(modelr) #for RMSE
 library(nlme)
 TBT.nonap.lapses <- nlme(lapses ~ b*(TWT_tbt - crit*day_num)^theta,
                    data = data.nonap,
@@ -260,6 +271,12 @@ summary(TBT.nonap.lapses)
     ## 
     ## Number of Observations: 824
     ## Number of Groups: 139
+
+``` r
+rmse(TBT.nonap.lapses, data.nfs)
+```
+
+    ## [1] 3.151056
 
 #### Estimates and their 95% confidence intervals
 
@@ -331,6 +348,12 @@ summary(TST.nonap.lapses)
     ## 
     ## Number of Observations: 824
     ## Number of Groups: 139
+
+``` r
+rmse(TBT.nonap.lapses, data.nfs)
+```
+
+    ## [1] 3.151056
 
 #### Estimates and their 95% confidence intervals
 
@@ -520,7 +543,7 @@ ggplot(aes(x = day_num, y = lapses, color = as.factor(test))) +
    stat_summary(fun = mean, geom = "point") +
    #stat_summary(fun.data = mean_cl_normal, geom = "errorbar", aes(group = as.factor(condition)), width = 0.05) +
    labs(x = "day", y = "mean lapses", title = " ", color = "test") +
-  facet_wrap(~ group)
+  facet_grid(~ type ~condition) 
 ```
 
 <img src="README_files/figure-gfm/unnamed-chunk-29-1.png" style="display: block; margin: auto;" />
@@ -529,18 +552,12 @@ ggplot(aes(x = day_num, y = lapses, color = as.factor(test))) +
 
 ### All conditions
 
+#### Summary
+
 ``` r
 library(nlme)
 
-# sleep.lme <- lmer(lapses ~ day_num + test + (day_num | id) + (day_num | group) , data.nfs)
-# 
-# sleep.lme
-# plot(sleep.lme)
-
 #inclusive of nap conditions
-
-library(modelr)
-
 sleep.allconditions.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
                    data = data.nfs,
                    fixed = b + crit + theta ~ 1,
@@ -581,17 +598,28 @@ summary(sleep.allconditions.lapses)
     ## Number of Observations: 3995
     ## Number of Groups: 222
 
-``` r
-rmse(sleep.allconditions.lapses, data.nfs)
-```
+#### RMSE
 
     ## [1] 6.366383
 
+#### Estimates and their 95% confidence intervals
+
+    ## Approximate 95% confidence intervals
+    ## 
+    ##  Fixed effects:
+    ##            lower       est.      upper
+    ## b      0.1150758  0.2055468  0.2960177
+    ## crit  13.1793665 13.8229262 14.4664858
+    ## theta  0.9622231  1.0775043  1.1927856
+    ## attr(,"label")
+    ## [1] "Fixed effects:"
+
 ### Only no nap conditions
+
+#### Summary
 
 ``` r
 #no nap
-
 sleep.nonap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
                    data = data.nonap,
                    fixed = b + crit + theta ~ 1,
@@ -632,23 +660,86 @@ summary(sleep.nonap.lapses)
     ## Number of Observations: 2555
     ## Number of Groups: 142
 
-``` r
-rmse(sleep.nonap.lapses, data.nonap)
-```
+#### RMSE
 
     ## [1] 7.244333
 
-``` r
-#nap only
-# 
-# sleep.nap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
-#                    data = data.nap,
-#                    fixed = b + crit + theta ~ 1,
-#                    random = crit ~ 1,
-#                    groups = ~ subj,
-#                    start = c(b = 2, crit = 14, theta = 0.6),
-#                    na.action = na.omit
-#                    )
-# 
-# summary(sleep.nap.lapses)
-```
+#### Estimates and their 95% confidence intervals
+
+    ## Approximate 95% confidence intervals
+    ## 
+    ##  Fixed effects:
+    ##             lower       est.      upper
+    ## b      0.04746279  0.1158091  0.1841554
+    ## crit  11.39473708 12.4401098 13.4854826
+    ## theta  1.05278470  1.1995067  1.3462287
+    ## attr(,"label")
+    ## [1] "Fixed effects:"
+
+### Only nap conditions
+
+#### Summary
+
+    ## Nonlinear mixed-effects model fit by maximum likelihood
+    ##   Model: lapses ~ b * (TWT - crit * day_num)^theta 
+    ##   Data: data.nap 
+    ##       AIC      BIC   logLik
+    ##   7669.34 7695.702 -3829.67
+    ## 
+    ## Random effects:
+    ##  Formula: crit ~ 1 | subj
+    ##              crit Residual
+    ## StdDev: 0.8947836 3.182258
+    ## 
+    ## Fixed effects:  b + crit + theta ~ 1 
+    ##           Value  Std.Error   DF   t-value p-value
+    ## b      1.737617 0.18002255 1358   9.65222       0
+    ## crit  17.568085 0.11425575 1358 153.76105       0
+    ## theta  0.734852 0.04226477 1358  17.38686       0
+    ##  Correlation: 
+    ##       b      crit  
+    ## crit   0.341       
+    ## theta -0.904 -0.195
+    ## 
+    ## Standardized Within-Group Residuals:
+    ##        Min         Q1        Med         Q3        Max 
+    ## -3.2553146 -0.5700844 -0.1210714  0.4116992  6.6657784 
+    ## 
+    ## Number of Observations: 1440
+    ## Number of Groups: 80
+
+#### RMSE
+
+    ## [1] 3.639682
+
+#### Estimates and their 95% confidence intervals
+
+    ## Approximate 95% confidence intervals
+    ## 
+    ##  Fixed effects:
+    ##            lower       est.      upper
+    ## b      1.3848326  1.7376171  2.0904015
+    ## crit  17.3441815 17.5680848 17.7919881
+    ## theta  0.6520269  0.7348518  0.8176767
+    ## attr(,"label")
+    ## [1] "Fixed effects:"
+
+## Visualising the results of TBT based estimate - all conditions
+
+### Dot Plot - Critical Wake Durations across participants
+
+![](README_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
+
+### QQ Plot - Normality of distribution
+
+![](README_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+
+### Histogram - Normality of distribution
+
+The plot indicates a left skew. I check the histogram
+
+![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
+
+### Residuals Plot
+
+![](README_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
