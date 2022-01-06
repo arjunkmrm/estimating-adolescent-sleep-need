@@ -1,38 +1,47 @@
 Estimating the sleep need of adolescents using nonlinear mixed effects
 modelling
 ================
+Arjun Kumar
 
 -   [Introduction](#introduction)
--   [The Dataset](#the-dataset)
-    -   [Data cleaning](#data-cleaning)
-    -   [Clean data](#clean-data)
--   [Visualising the dataset](#visualising-the-dataset)
-    -   [Boxplot - Lapses vs Sleep
-        Condition](#boxplot---lapses-vs-sleep-condition)
-    -   [Line plot - Lapses vs Day](#line-plot---lapses-vs-day)
--   [Estimating Sleep Need](#estimating-sleep-need)
-    -   [TBT based estimate](#tbt-based-estimate)
-        -   [Summary](#summary)
-        -   [Estimates and their 95% confidence
-            intervals](#estimates-and-their-95-confidence-intervals)
-    -   [TST based estimate](#tst-based-estimate)
-        -   [Summary](#summary-1)
-        -   [Estimates and their 95% confidence
-            intervals](#estimates-and-their-95-confidence-intervals-1)
--   [Visualising the results of TST based
-    estimate](#visualising-the-results-of-tst-based-estimate)
-    -   [Dot Plot - Critical Wake Durations across
-        participants](#dot-plot---critical-wake-durations-across-participants)
-    -   [QQ Plot - Normality of
-        distribution](#qq-plot---normality-of-distribution)
-    -   [Histogram - Normality of
-        distribution](#histogram---normality-of-distribution)
-    -   [Residuals Plot](#residuals-plot)
-    -   [Comparison against estimates based on the
-        literature](#comparison-against-estimates-based-on-the-literature)
-    -   [Mean lapses vs excess
-        wakefulness](#mean-lapses-vs-excess-wakefulness)
-    -   [Predicted Lapses vs Day](#predicted-lapses-vs-day)
+-   [Part 1 - with aggregated test
+    conditions](#part-1---with-aggregated-test-conditions)
+    -   [The Dataset](#the-dataset)
+        -   [Data cleaning](#data-cleaning)
+        -   [Clean data](#clean-data)
+    -   [Visualising the dataset](#visualising-the-dataset)
+        -   [Boxplot - Lapses vs Sleep
+            Condition](#boxplot---lapses-vs-sleep-condition)
+        -   [Line plot - Lapses vs Day](#line-plot---lapses-vs-day)
+    -   [Estimating Sleep Need](#estimating-sleep-need)
+        -   [TBT based estimate](#tbt-based-estimate)
+        -   [TST based estimate](#tst-based-estimate)
+    -   [Visualising the results of TST based
+        estimate](#visualising-the-results-of-tst-based-estimate)
+        -   [Dot Plot - Critical Wake Durations across
+            participants](#dot-plot---critical-wake-durations-across-participants)
+        -   [QQ Plot - Normality of
+            distribution](#qq-plot---normality-of-distribution)
+        -   [Histogram - Normality of
+            distribution](#histogram---normality-of-distribution)
+        -   [Residuals Plot](#residuals-plot)
+        -   [Comparison against estimates based on the
+            literature](#comparison-against-estimates-based-on-the-literature)
+        -   [Mean lapses vs excess
+            wakefulness](#mean-lapses-vs-excess-wakefulness)
+        -   [Predicted Lapses vs Day](#predicted-lapses-vs-day)
+-   [Part 2 - without aggregating test
+    conditions](#part-2---without-aggregating-test-conditions)
+    -   [The Dataset](#the-dataset-1)
+        -   [Data cleaning](#data-cleaning-1)
+        -   [Clean dataset](#clean-dataset)
+    -   [Visualising the Dataset](#visualising-the-dataset-1)
+        -   [mean lapses against time awake (from sleep at night or
+            nap)](#mean-lapses-against-time-awake-from-sleep-at-night-or-nap)
+        -   [Mean lapses vs Day](#mean-lapses-vs-day)
+    -   [Estimating Sleep Need](#estimating-sleep-need-1)
+        -   [All conditions](#all-conditions)
+        -   [Only no nap conditions](#only-no-nap-conditions)
 
 # Introduction
 
@@ -71,7 +80,9 @@ studies also had periods of recovery sleep, either inbetween or at the
 end. However, only the baseline sleep plus the days of sleep restriction
 until the first sleep recovery period is sufficient for this analysis.
 
-# The Dataset
+# Part 1 - with aggregated test conditions
+
+## The Dataset
 
 The dataset for this analysis came from NFS1, NFS2, NFS4 and NFS5. Here
 is a section of the original dataset. Most of the columns have been
@@ -85,7 +96,7 @@ omitted for the sake of presentation here.
     ## 5 NFS001 Female       2        2   4           253        44          0
     ## 6 NFS001 Female       2        3   5           253        52          0
 
-## Data cleaning
+### Data cleaning
 
 First, I selected only the columns that were required for the analysis.
 
@@ -159,7 +170,7 @@ based on the TBT and TST estimates.
     ## 5 NFS001       5 nonap_5hx7  7      4.3  NFS1      5         5      91    96.9
     ## 6 NFS001       6 nonap_5hx7 17.3    4.23 NFS1      5         5     110   117.
 
-## Clean data
+### Clean data
 
 Summing up, the last baseline day plus the first five sleep manipulation
 days were used for the analysis from the NFS studies. ‘Lapses’
@@ -182,12 +193,12 @@ observations in total (6 days x 139 subjects).
     ## 5 NFS001       5 nonap_5hx7  7      4.3  NFS1      5         5      91    96.9
     ## 6 NFS001       6 nonap_5hx7 17.3    4.23 NFS1      5         5     110   117.
 
-# Visualising the dataset
+## Visualising the dataset
 
 For this analysis, I have mainly focused on no nap conditions. Hence the
 visualizations below do not include the conditions that had nap time.
 
-## Boxplot - Lapses vs Sleep Condition
+### Boxplot - Lapses vs Sleep Condition
 
 ![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
@@ -195,15 +206,15 @@ As it can be seen, the number of lapses increases across the days as the
 level of sleep restriction increases. This can be noted more clearly in
 the following charts
 
-## Line plot - Lapses vs Day
+### Line plot - Lapses vs Day
 
 ![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
-# Estimating Sleep Need
+## Estimating Sleep Need
 
-## TBT based estimate
+### TBT based estimate
 
-### Summary
+#### Summary
 
 I’m using the nlme() function from the nlme library to fit a nonlinear
 mixed effects model to my data.
@@ -250,7 +261,7 @@ summary(TBT.nonap.lapses)
     ## Number of Observations: 824
     ## Number of Groups: 139
 
-### Estimates and their 95% confidence intervals
+#### Estimates and their 95% confidence intervals
 
 ``` r
 intervals(TBT.nonap.lapses)
@@ -275,9 +286,9 @@ intervals(TBT.nonap.lapses)
     ##    lower     est.    upper 
     ## 2.341592 2.472632 2.611006
 
-## TST based estimate
+### TST based estimate
 
-### Summary
+#### Summary
 
 ``` r
 #SLEEP TIME ESTIMATES - no nap
@@ -321,7 +332,7 @@ summary(TST.nonap.lapses)
     ## Number of Observations: 824
     ## Number of Groups: 139
 
-### Estimates and their 95% confidence intervals
+#### Estimates and their 95% confidence intervals
 
 ``` r
 intervals(TST.nonap.lapses)
@@ -346,36 +357,35 @@ intervals(TST.nonap.lapses)
     ##    lower     est.    upper 
     ## 2.369793 2.502080 2.641752
 
-# Visualising the results of TST based estimate
+## Visualising the results of TST based estimate
 
-## Dot Plot - Critical Wake Durations across participants
+### Dot Plot - Critical Wake Durations across participants
 
 ![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
-## QQ Plot - Normality of distribution
+### QQ Plot - Normality of distribution
 
 ![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
-## Histogram - Normality of distribution
+### Histogram - Normality of distribution
 
 The plot indicates a left skew. Let’s check the histogram
 
 ![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
-## Residuals Plot
+### Residuals Plot
 
 ![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
-## Comparison against estimates based on the literature
+### Comparison against estimates based on the literature
 
-There are clearly some outliers having oversized influence on the
-distribution. Let’s assume normalty for now and compare the distribution
-obtained from this estimate with Van Dongen et al.(2003) and Short et
-al. (2018) estimates for the critical waking duration
+I compared the distribution obtained from this estimate with Van Dongen
+et al.(2003) and Short et al. (2018) estimates for the critical waking
+duration
 
 ![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
-## Mean lapses vs excess wakefulness
+### Mean lapses vs excess wakefulness
 
 ![lapses = 3.62\*(excess)^{0.67}](https://latex.codecogs.com/png.latex?lapses%20%3D%203.62%2A%28excess%29%5E%7B0.67%7D "lapses = 3.62*(excess)^{0.67}")
 
@@ -384,7 +394,7 @@ actual number of lapses observed.
 
 ![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
-## Predicted Lapses vs Day
+### Predicted Lapses vs Day
 
 ![lapses = 3.62\*(CWT - 17.13\*day)^{0.67}](https://latex.codecogs.com/png.latex?lapses%20%3D%203.62%2A%28CWT%20-%2017.13%2Aday%29%5E%7B0.67%7D "lapses = 3.62*(CWT - 17.13*day)^{0.67}")
 
@@ -395,3 +405,250 @@ greater than that of Van Dongen’s estimate (15.84). Our results seem to
 suggest that for the average adolescent (based on the sample used for
 this study), 6.87h of sleep would be sufficient to prevent the build of
 neurobehavioral deficits at least in the context of the PVT task.
+
+# Part 2 - without aggregating test conditions
+
+In this part of the analysis, I won’t be aggregating the test results.
+
+## The Dataset
+
+I reloaded the nfs dataset again for the analysis.
+
+    ##     subj gender day_num test_num kss pvt_median_rt pvt_sd_rt pvt_lapses
+    ## 1 NFS001 Female       1        1   6           229        78          1
+    ## 2 NFS001 Female       1        2   7           250        90          2
+    ## 3 NFS001 Female       1        3   4           244        68          1
+    ## 4 NFS001 Female       2        1   4           245        59          1
+    ## 5 NFS001 Female       2        2   4           253        44          0
+    ## 6 NFS001 Female       2        3   5           253        52          0
+
+### Data cleaning
+
+Again, similar to part 1, I selected only the columns that were required
+for the analysis.
+
+    ##     subj day_num      group lapses
+    ## 1 NFS001       1 nonap_5hx7      1
+    ## 2 NFS001       1 nonap_5hx7      2
+    ## 3 NFS001       1 nonap_5hx7      1
+    ## 4 NFS001       2 nonap_5hx7      1
+    ## 5 NFS001       2 nonap_5hx7      0
+    ## 6 NFS001       2 nonap_5hx7      0
+    ## 7 NFS001       3 nonap_5hx7      6
+    ## 8 NFS001       3 nonap_5hx7      6
+
+I created a new column called ST that indicated the TBT from the past
+night
+
+    ##     subj day_num      group lapses TBT condition
+    ## 1 NFS001       1 nonap_5hx7      1   9         5
+    ## 2 NFS001       1 nonap_5hx7      2   9         5
+    ## 3 NFS001       1 nonap_5hx7      1   9         5
+    ## 4 NFS001       2 nonap_5hx7      1   5         5
+    ## 5 NFS001       2 nonap_5hx7      0   5         5
+    ## 6 NFS001       2 nonap_5hx7      0   5         5
+    ## 7 NFS001       3 nonap_5hx7      6   5         5
+    ## 8 NFS001       3 nonap_5hx7      6   5         5
+
+Next, I used the TBT data from each night to calculate the cumulative
+total wake time based on the TBT measures until each test time. For
+example, if test 1 is at 10 AM and this is day 3, the cumulative wake
+duration would be the (Total hours since start of first wake time after
+the end of baseline sleep - cumulative TBT since start of protocol).
+Additionally, for conditions with nap, I subtracted the nap duration
+from the cumulative wake duration for test in which participants had a
+nap preceding the test and during the day.
+
+    ## [1] 3996
+
+    ##     subj day_num    group lapses TBT condition test TWT wake_time test_time WD
+    ## 1 NFS001       1 nonap_5h      1   9         5    1  19         6        10  4
+    ## 2 NFS001       1 nonap_5h      2   9         5    2  24         6        15  9
+    ## 3 NFS001       1 nonap_5h      1   9         5    3  29         6        20 14
+    ## 4 NFS001       2 nonap_5h      1   5         5    1  38         6        10  4
+    ## 5 NFS001       2 nonap_5h      0   5         5    2  43         6        15  9
+    ## 6 NFS001       2 nonap_5h      0   5         5    3  48         6        20 14
+    ## 7 NFS001       3 nonap_5h      6   5         5    1  57         6        10  4
+    ## 8 NFS001       3 nonap_5h      6   5         5    2  62         6        15  9
+    ##     type
+    ## 1 no nap
+    ## 2 no nap
+    ## 3 no nap
+    ## 4 no nap
+    ## 5 no nap
+    ## 6 no nap
+    ## 7 no nap
+    ## 8 no nap
+
+### Clean dataset
+
+Final dataset after cleaning
+
+    ##     subj day_num    group lapses TBT condition test TWT wake_time test_time WD
+    ## 1 NFS001       1 nonap_5h      1   9         5    1  19         6        10  4
+    ## 2 NFS001       1 nonap_5h      2   9         5    2  24         6        15  9
+    ## 3 NFS001       1 nonap_5h      1   9         5    3  29         6        20 14
+    ## 4 NFS001       2 nonap_5h      1   5         5    1  38         6        10  4
+    ## 5 NFS001       2 nonap_5h      0   5         5    2  43         6        15  9
+    ## 6 NFS001       2 nonap_5h      0   5         5    3  48         6        20 14
+    ## 7 NFS001       3 nonap_5h      6   5         5    1  57         6        10  4
+    ## 8 NFS001       3 nonap_5h      6   5         5    2  62         6        15  9
+    ##     type
+    ## 1 no nap
+    ## 2 no nap
+    ## 3 no nap
+    ## 4 no nap
+    ## 5 no nap
+    ## 6 no nap
+    ## 7 no nap
+    ## 8 no nap
+
+## Visualising the Dataset
+
+### mean lapses against time awake (from sleep at night or nap)
+
+<img src="README_files/figure-gfm/unnamed-chunk-28-1.png" style="display: block; margin: auto;" />
+
+### Mean lapses vs Day
+
+``` r
+#mean lapses vs Day
+
+data.nfs %>% mutate(across(group, factor, levels=c("control_9h","nonap_8h","nap90_6pt5h", "nonap_6pt5h", "nap90_5h", "nap60_5h", "nonap_5h"))) %>% 
+ggplot(aes(x = day_num, y = lapses, color = as.factor(test))) +
+   stat_summary(fun = mean, geom = "line", size = 1, alpha = 0.5) +
+   stat_summary(fun = mean, geom = "point") +
+   #stat_summary(fun.data = mean_cl_normal, geom = "errorbar", aes(group = as.factor(condition)), width = 0.05) +
+   labs(x = "day", y = "mean lapses", title = " ", color = "test") +
+  facet_wrap(~ group)
+```
+
+<img src="README_files/figure-gfm/unnamed-chunk-29-1.png" style="display: block; margin: auto;" />
+
+## Estimating Sleep Need
+
+### All conditions
+
+``` r
+library(nlme)
+
+# sleep.lme <- lmer(lapses ~ day_num + test + (day_num | id) + (day_num | group) , data.nfs)
+# 
+# sleep.lme
+# plot(sleep.lme)
+
+#inclusive of nap conditions
+
+library(modelr)
+
+sleep.allconditions.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
+                   data = data.nfs,
+                   fixed = b + crit + theta ~ 1,
+                   random = crit ~ 1,
+                   groups = ~ subj,
+                   start = c(b = 2, crit = 14, theta = 0.5),
+                   na.action = na.omit
+                   )
+
+summary(sleep.allconditions.lapses)
+```
+
+    ## Nonlinear mixed-effects model fit by maximum likelihood
+    ##   Model: lapses ~ b * (TWT - crit * day_num)^theta 
+    ##   Data: data.nfs 
+    ##        AIC      BIC    logLik
+    ##   26137.06 26168.53 -13063.53
+    ## 
+    ## Random effects:
+    ##  Formula: crit ~ 1 | subj
+    ##                crit Residual
+    ## StdDev: 0.000572914 6.366384
+    ## 
+    ## Fixed effects:  b + crit + theta ~ 1 
+    ##           Value Std.Error   DF  t-value p-value
+    ## b      0.205547 0.0461620 3771  4.45272       0
+    ## crit  13.822926 0.3283707 3771 42.09549       0
+    ## theta  1.077504 0.0588213 3771 18.31828       0
+    ##  Correlation: 
+    ##       b      crit  
+    ## crit   0.641       
+    ## theta -0.959 -0.412
+    ## 
+    ## Standardized Within-Group Residuals:
+    ##        Min         Q1        Med         Q3        Max 
+    ## -1.7681189 -0.5314576 -0.1973687  0.2172085  7.9065137 
+    ## 
+    ## Number of Observations: 3995
+    ## Number of Groups: 222
+
+``` r
+rmse(sleep.allconditions.lapses, data.nfs)
+```
+
+    ## [1] 6.366383
+
+### Only no nap conditions
+
+``` r
+#no nap
+
+sleep.nonap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
+                   data = data.nonap,
+                   fixed = b + crit + theta ~ 1,
+                   random = crit ~ 1,
+                   groups = ~ subj,
+                   start = c(b = 1, crit = 12, theta = 0.4),
+                   na.action = na.omit
+                   )
+
+summary(sleep.nonap.lapses)
+```
+
+    ## Nonlinear mixed-effects model fit by maximum likelihood
+    ##   Model: lapses ~ b * (TWT - crit * day_num)^theta 
+    ##   Data: data.nonap 
+    ##       AIC      BIC    logLik
+    ##   17379.7 17408.93 -8684.849
+    ## 
+    ## Random effects:
+    ##  Formula: crit ~ 1 | subj
+    ##                crit Residual
+    ## StdDev: 0.001138025 7.244334
+    ## 
+    ## Fixed effects:  b + crit + theta ~ 1 
+    ##           Value Std.Error   DF   t-value p-value
+    ## b      0.115809 0.0348742 2411  3.320769   9e-04
+    ## crit  12.440110 0.5334087 2411 23.321908   0e+00
+    ## theta  1.199507 0.0748659 2411 16.022063   0e+00
+    ##  Correlation: 
+    ##       b      crit  
+    ## crit   0.563       
+    ## theta -0.953 -0.299
+    ## 
+    ## Standardized Within-Group Residuals:
+    ##        Min         Q1        Med         Q3        Max 
+    ## -1.7177180 -0.5190705 -0.2433830  0.1732791  6.8882463 
+    ## 
+    ## Number of Observations: 2555
+    ## Number of Groups: 142
+
+``` r
+rmse(sleep.nonap.lapses, data.nonap)
+```
+
+    ## [1] 7.244333
+
+``` r
+#nap only
+# 
+# sleep.nap.lapses <- nlme(lapses ~ b*(TWT - crit*day_num)^theta,
+#                    data = data.nap,
+#                    fixed = b + crit + theta ~ 1,
+#                    random = crit ~ 1,
+#                    groups = ~ subj,
+#                    start = c(b = 2, crit = 14, theta = 0.6),
+#                    na.action = na.omit
+#                    )
+# 
+# summary(sleep.nap.lapses)
+```
