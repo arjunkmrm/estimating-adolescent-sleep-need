@@ -2,6 +2,8 @@
 title: Estimating the sleep need of adolescents using nonlinear mixed effects modelling
 author: Arjun Kumar
 output: 
+  pdf_document:
+    toc: true
   github_document:
     pandoc_args: --webtex
     dev: png
@@ -865,14 +867,14 @@ intervals(sleep.onlynap.lapses, which = 'fixed')
 
 #extract critical wake duration
 crit <- data.frame()
-crit <- sleep.allconditions.lapses$coefficients$random$subj + sleep.allconditions.lapses$coefficients$fixed[3]
+crit <- sleep.allconditions.lapses$coefficients$random$subj + sleep.allconditions.lapses$coefficients$fixed[2]
 crit <- data.frame(crit)
 
 crit$id <- 1:nrow(crit)
 
 ggplot(crit, aes(x = crit, y = id)) +
   geom_point(alpha = 0.5, size = 0.8, color = "darkgreen") +
-  geom_vline(xintercept = sleep.allconditions.lapses$coefficients$fixed[3], color = "navyblue", linetype = 2, size = 0.7) +
+  geom_vline(xintercept = sleep.allconditions.lapses$coefficients$fixed[2], color = "navyblue", linetype = 2, size = 0.7) +
   labs(x = "critical waking duration", y = "id")
 ```
 
@@ -914,11 +916,10 @@ plot(sleep.allconditions.lapses, cex=0.5)
 
 ```{r, eval=FALSE, echo = FALSE, message=FALSE, fig.height = 4, fig.width=6, dpi=300}
 
-
 #plot different estimates
 ggplot(crit, aes(x = crit)) +
   #stat_function(fun = dnorm, args = list(15.88, 1.42), color = "red", size = 1, alpha = 0.5) +
-  geom_area(stat = "function", fun = dnorm, args = list(mean = sleep.allconditions.lapses$coefficients$fixed[3], sd = sdcrit), aes(fill = "NFS, age: 15 - 19"), alpha = 0.2) +
+  geom_area(stat = "function", fun = dnorm, args = list(mean = sleep.allconditions.lapses$coefficients$fixed[2], sd = 0.9), aes(fill = "NFS, age: 15 - 19"), alpha = 0.2) +
   geom_area(stat = "function", fun = dnorm, args = list(mean = 15.82, sd = 3.84), aes(fill = "Van Dongen et al., age: 21 - 38"), alpha = 0.2)+
   geom_area(stat = "function", fun = dnorm, args = list(mean = 14.65, sd = 4.14), aes(fill = "Short et al., age: 15 - 17"),  alpha = 0.2)
 
@@ -955,7 +956,7 @@ data.nonap$plapses = predict(sleep.allconditions.lapses, data.nonap)
 data.nonap$plapses[is.nan(data.nonap$plapses)] <- 0.0
 
 #graphing lapses vs excess
-crit.lapses <- sleep.allconditions.lapses$coefficients$random$subj + sleep.allconditions.lapses$coefficients$fixed[3]
+crit.lapses <- sleep.allconditions.lapses$coefficients$random$subj + sleep.allconditions.lapses$coefficients$fixed[2]
 crit.lapses <- data.frame(crit.lapses)
 
 #crit.lapses %>% filter(crit < 15)
