@@ -7,51 +7,18 @@ Arjun Kumar
 -   [Part 1 - with aggregated test
     conditions](#part-1---with-aggregated-test-conditions)
     -   [The Dataset](#the-dataset)
-        -   [Data cleaning](#data-cleaning)
-        -   [Clean data](#clean-data)
     -   [Visualising the dataset](#visualising-the-dataset)
-        -   [Boxplot - Lapses vs Sleep
-            Condition](#boxplot---lapses-vs-sleep-condition)
-        -   [Line plot - Lapses vs Day](#line-plot---lapses-vs-day)
     -   [Estimating Sleep Need](#estimating-sleep-need)
-        -   [TBT based estimate](#tbt-based-estimate)
-        -   [TST based estimate](#tst-based-estimate)
     -   [Visualising the results of TST based
         estimate](#visualising-the-results-of-tst-based-estimate)
-        -   [Dot Plot - Critical Wake Durations across
-            participants](#dot-plot---critical-wake-durations-across-participants)
-        -   [QQ Plot - Normality of
-            distribution](#qq-plot---normality-of-distribution)
-        -   [Histogram - Normality of
-            distribution](#histogram---normality-of-distribution)
-        -   [Residuals Plot](#residuals-plot)
-        -   [Comparison against estimates based on the
-            literature](#comparison-against-estimates-based-on-the-literature)
-        -   [Mean lapses vs excess
-            wakefulness](#mean-lapses-vs-excess-wakefulness)
-        -   [Predicted Lapses vs Day](#predicted-lapses-vs-day)
 -   [Part 2 - without aggregating test
     conditions](#part-2---without-aggregating-test-conditions)
     -   [The Dataset](#the-dataset-1)
-        -   [Data cleaning](#data-cleaning-1)
-        -   [Clean dataset](#clean-dataset)
     -   [Visualising the Dataset](#visualising-the-dataset-1)
-        -   [mean lapses against time awake (from sleep at night or
-            nap)](#mean-lapses-against-time-awake-from-sleep-at-night-or-nap)
-        -   [Mean lapses vs Day](#mean-lapses-vs-day)
     -   [Estimating Sleep Need](#estimating-sleep-need-1)
-        -   [All conditions](#all-conditions)
-        -   [Only no nap conditions](#only-no-nap-conditions)
-        -   [Only nap conditions](#only-nap-conditions)
-    -   [Visualising the results of TBT based estimate - all
-        conditions](#visualising-the-results-of-tbt-based-estimate---all-conditions)
-        -   [Dot Plot - Critical Wake Durations across
-            participants](#dot-plot---critical-wake-durations-across-participants-1)
-        -   [QQ Plot - Normality of
-            distribution](#qq-plot---normality-of-distribution-1)
-        -   [Histogram - Normality of
-            distribution](#histogram---normality-of-distribution-1)
-        -   [Residuals Plot](#residuals-plot-1)
+    -   [Visualising the results of TBT based estimate - only
+        nap](#visualising-the-results-of-tbt-based-estimate---only-nap)
+-   [Summary of all results](#summary-of-all-results)
 
 # Introduction
 
@@ -274,7 +241,7 @@ summary(TBT.nonap.lapses)
 
 #### RMSE
 
-    ## [1] 3.151056
+    ## [1] 3.158632
 
 #### Estimates and their 95% confidence intervals
 
@@ -349,7 +316,7 @@ summary(TST.nonap.lapses)
 
 #### RMSE
 
-    ## [1] 3.151056
+    ## [1] 3.084051
 
 #### Estimates and their 95% confidence intervals
 
@@ -719,8 +686,17 @@ summary(sleep.nonap.lapses)
     ## theta  0.6520269  0.7348518  0.8176767
     ## attr(,"label")
     ## [1] "Fixed effects:"
+    ## 
+    ##  Random Effects:
+    ##   Level: subj 
+    ##              lower      est.    upper
+    ## sd(crit) 0.7469947 0.8947836 1.071812
+    ## 
+    ##  Within-group standard error:
+    ##    lower     est.    upper 
+    ## 3.064016 3.182258 3.305062
 
-## Visualising the results of TBT based estimate - all conditions
+## Visualising the results of TBT based estimate - only nap
 
 ### Dot Plot - Critical Wake Durations across participants
 
@@ -739,3 +715,24 @@ The plot indicates a left skew. I checked the histogram
 ### Residuals Plot
 
 ![](README_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
+
+# Summary of all results
+
+    ##                                       measure     RMSE sleep_need.estimate
+    ## 1             aggregated tests (TST) - no nap 3.084051            6.868654
+    ## 2             aggregated tests (TBT) - no nap 3.158632            7.786787
+    ## 3         tests not aggregated (TBT) - no nap 7.244333           11.559890
+    ## 4 tests not aggregated (TBT) - all conditions 6.366383           10.177074
+    ## 5       tests not aggregated (TBT) - nap only 3.639682            6.431915
+    ## 6            Van Dongen et al. (TST) - no nap       NA            8.160000
+    ## 7                 Short et al. (TST) - no nap       NA            9.350000
+    ##   theta.estimate
+    ## 1      0.6744519
+    ## 2      0.6675534
+    ## 3      1.1995067
+    ## 4      1.0775043
+    ## 5      0.7348518
+    ## 6      0.6700000
+    ## 7      0.5900000
+
+![](README_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->

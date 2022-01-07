@@ -2,12 +2,11 @@
 title: Estimating the sleep need of adolescents using nonlinear mixed effects modelling
 author: Arjun Kumar
 output: 
-  pdf_document:
-    toc: true
   github_document:
     pandoc_args: --webtex
     dev: png
     toc: true
+    toc_depth: 2
 ---
 
 
@@ -333,7 +332,8 @@ summary(TBT.nonap.lapses)
 
 ```{r, message=FALSE, echo=FALSE}
 
-rmse(TBT.nonap.lapses, data.nfs)
+TBT.nonap.RMSE = rmse(TBT.nonap.lapses, data.nonap)
+print(TBT.nonap.RMSE)
 
 ```
 
@@ -368,7 +368,8 @@ summary(TST.nonap.lapses)
 
 ```{r, message=FALSE, echo=FALSE}
 
-rmse(TBT.nonap.lapses, data.nfs)
+TST.nonap.RMSE = rmse(TST.nonap.lapses, data.nonap)
+print(TST.nonap.RMSE)
 
 ```
 
@@ -721,7 +722,7 @@ print(head(data.nfs, 8))
 ## Visualising the Dataset
 ### mean lapses against time awake (from sleep at night or nap)
 
-```{r, echo=FALSE, message=FALSE, fig.align="center", fig.width=8, fig.height=8}
+```{r, echo=FALSE, message=FALSE, fig.align="center", fig.width=8, fig.height=8, dpi=300}
 
 #mean lapses vs day
 data.nfs %>% mutate(across(group, factor, levels=c("control_9h","nonap_8h","nap90_6pt5h", "nonap_6pt5h", "nap90_5h", "nap60_5h", "nonap_5h"))) %>% 
@@ -737,7 +738,7 @@ ggplot(aes(x = WD, y = lapses)) +
 
 ### Mean lapses vs Day
 
-```{r, message=FALSE, fig.align="center", fig.width=8, fig.height=8}
+```{r, message=FALSE, fig.align="center", fig.width=8, fig.height=8, dpi=300}
 
 #mean lapses vs Day
 
@@ -777,7 +778,8 @@ summary(sleep.allconditions.lapses)
 #### RMSE
 
 ```{r, message=FALSE, echo=FALSE}
-rmse(sleep.allconditions.lapses, data.nfs)
+sleep.all.RMSE = rmse(sleep.allconditions.lapses, data.nfs)
+print(sleep.all.RMSE)
 
 ```
 
@@ -812,7 +814,8 @@ summary(sleep.nonap.lapses)
 
 ```{r, message=FALSE, echo=FALSE}
 
-rmse(sleep.nonap.lapses, data.nonap)
+sleep.nonap.RMSE = rmse(sleep.nonap.lapses, data.nonap)
+print(sleep.nonap.RMSE)
 
 ``` 
 
@@ -848,7 +851,8 @@ summary(sleep.onlynap.lapses)
 
 ```{r, message=FALSE, echo=FALSE}
 
-rmse(sleep.onlynap.lapses, data.nap)
+sleep.onlynap.RMSE = rmse(sleep.onlynap.lapses, data.nap)
+print(sleep.onlynap.RMSE)
 
 ```
 
@@ -856,25 +860,25 @@ rmse(sleep.onlynap.lapses, data.nap)
 
 ```{r, message=FALSE, echo=FALSE}
 
-intervals(sleep.onlynap.lapses, which = 'fixed')
+intervals(sleep.onlynap.lapses)
 
 ```
 
-## Visualising the results of TBT based estimate - all conditions
+## Visualising the results of TBT based estimate - only nap
 ### Dot Plot - Critical Wake Durations across participants
 
 ```{r, echo = FALSE, message=FALSE, fig.height = 5, fig.width=8, dpi=300}
 
 #extract critical wake duration
 crit <- data.frame()
-crit <- sleep.allconditions.lapses$coefficients$random$subj + sleep.allconditions.lapses$coefficients$fixed[2]
+crit <- sleep.onlynap.lapses$coefficients$random$subj + sleep.onlynap.lapses$coefficients$fixed[2]
 crit <- data.frame(crit)
 
 crit$id <- 1:nrow(crit)
 
 ggplot(crit, aes(x = crit, y = id)) +
   geom_point(alpha = 0.5, size = 0.8, color = "darkgreen") +
-  geom_vline(xintercept = sleep.allconditions.lapses$coefficients$fixed[2], color = "navyblue", linetype = 2, size = 0.7) +
+  geom_vline(xintercept = sleep.onlynap.lapses$coefficients$fixed[2], color = "navyblue", linetype = 2, size = 0.7) +
   labs(x = "critical waking duration", y = "id")
 ```
 
@@ -883,7 +887,7 @@ ggplot(crit, aes(x = crit, y = id)) +
 ```{r, echo = FALSE, message=FALSE, fig.height = 5, fig.width=8, dpi=300}
 
 #extract sd of random effects
-sdcrit <- intervals(sleep.allconditions.lapses, which='fixed')
+sdcrit <- intervals(sleep.onlynap.lapses, which='fixed')
 sdcrit <- sdcrit$reStruct$subj$est.
 
 qqnorm(crit$crit, pch = 1, frame = FALSE)
@@ -908,7 +912,7 @@ ggplot(crit, aes(x = crit)) +
 
 ```{r, echo = FALSE, message=FALSE, fig.height = 5, fig.width=8, dpi=300}
 
-plot(sleep.allconditions.lapses, cex=0.5)
+plot(sleep.onlynap.lapses, cex=0.5)
 
 ```
 
@@ -919,7 +923,7 @@ plot(sleep.allconditions.lapses, cex=0.5)
 #plot different estimates
 ggplot(crit, aes(x = crit)) +
   #stat_function(fun = dnorm, args = list(15.88, 1.42), color = "red", size = 1, alpha = 0.5) +
-  geom_area(stat = "function", fun = dnorm, args = list(mean = sleep.allconditions.lapses$coefficients$fixed[2], sd = 0.9), aes(fill = "NFS, age: 15 - 19"), alpha = 0.2) +
+  geom_area(stat = "function", fun = dnorm, args = list(mean = sleep.onlynap.lapses$coefficients$fixed[2], sd = 0.9), aes(fill = "NFS, age: 15 - 19"), alpha = 0.2) +
   geom_area(stat = "function", fun = dnorm, args = list(mean = 15.82, sd = 3.84), aes(fill = "Van Dongen et al., age: 21 - 38"), alpha = 0.2)+
   geom_area(stat = "function", fun = dnorm, args = list(mean = 14.65, sd = 4.14), aes(fill = "Short et al., age: 15 - 17"),  alpha = 0.2)
 
@@ -952,11 +956,11 @@ ggplot(crit, aes(x = crit)) +
 #   labs(x = "excess wakefulness", y = "mean lapses", title = "Mean Lapses vs Excess Wakefulness", color = "condition")
 
 #lapses predictions
-data.nonap$plapses = predict(sleep.allconditions.lapses, data.nonap)
+data.nonap$plapses = predict(sleep.onlynap.lapses, data.nonap)
 data.nonap$plapses[is.nan(data.nonap$plapses)] <- 0.0
 
 #graphing lapses vs excess
-crit.lapses <- sleep.allconditions.lapses$coefficients$random$subj + sleep.allconditions.lapses$coefficients$fixed[2]
+crit.lapses <- sleep.onlynap.lapses$coefficients$random$subj + sleep.onlynap.lapses$coefficients$fixed[2]
 crit.lapses <- data.frame(crit.lapses)
 
 #crit.lapses %>% filter(crit < 15)
@@ -1011,5 +1015,36 @@ ggplot(data.nonap, aes(x = day_num, y = excess.lapses, color = as.factor(conditi
    #geom_jitter(aes(y = lapses), alpha = 0.3) +
    stat_summary(fun.data = mean_cl_normal, geom = "errorbar", aes(group = as.factor(condition)), width = 0.05) +
    labs(x = "day", y = "mean lapses", title = " ", color = "condition") + theme_minimal()
+
+```
+
+# Summary of all results
+
+```{r, message=FALSE, echo=FALSE, fig.width=8, fig.height=6, dpi=300}
+
+measures = factor(c('aggregated tests (TST) - no nap', 'aggregated tests (TBT) - no nap', 'tests not aggregated (TBT) - no nap', 'tests not aggregated (TBT) - all conditions', 'tests not aggregated (TBT) - nap only', 'Van Dongen et al. (TST) - no nap', 'Short et al. (TST) - no nap'))
+
+RMSE.c = c(TST.nonap.RMSE, TBT.nonap.RMSE, sleep.nonap.RMSE, sleep.all.RMSE, sleep.onlynap.RMSE, NA, NA)
+
+
+sleep_need.estimates = c(24 - TST.nonap.lapses$coefficients$fixed[3], 24 - TBT.nonap.lapses$coefficients$fixed[3], 24 - sleep.nonap.lapses$coefficients$fixed[2], 24 - sleep.allconditions.lapses$coefficients$fixed[2], 24 - sleep.onlynap.lapses$coefficients$fixed[2], 24 - 15.84, 24 - 14.65)
+
+theta.estimates = c(TST.nonap.lapses$coefficients$fixed[2], TBT.nonap.lapses$coefficients$fixed[2], sleep.nonap.lapses$coefficients$fixed[3], sleep.allconditions.lapses$coefficients$fixed[3], sleep.onlynap.lapses$coefficients$fixed[3], 0.67, 0.59)
+
+se.estimates = c(TST.nonap.lapses$coefficients$fixed[3], TBT.nonap.lapses$coefficients$fixed[3], sleep.nonap.lapses$coefficients$fixed[2], sleep.allconditions.lapses$coefficients$fixed[2], sleep.onlynap.lapses$coefficients$fixed[2], 15.84)
+
+(RMSE.df = data.frame(measure = measures, RMSE = RMSE.c, sleep_need.estimate = sleep_need.estimates, theta.estimate = theta.estimates))
+
+RMSE.df$measure = factor(RMSE.df$measure, levels = RMSE.df$measure)
+
+RMSE.long = pivot_longer(RMSE.df, !measure, names_to = 'type', values_to = 'value')
+
+
+ggplot(RMSE.long, aes(x=measure, value, label = round(value, 2))) +
+  geom_point(aes(color = type), size=2.5, alpha=0.7) + 
+  geom_line(aes(group = type, color = type), alpha = 0.4) + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) + xlab('data') + geom_text(vjust = 0.8, nudge_y = 0.7) + 
+  labs(color = 'measure') + scale_color_discrete(labels = c("RMSE", "Sleep Need", 'Theta'))
+
 
 ```
